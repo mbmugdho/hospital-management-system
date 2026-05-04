@@ -70,45 +70,58 @@ export default function Features() {
   return (
     <section id="features" className="py-20 lg:py-28 bg-[#F8FAFC]">
       <Container>
-        {/* ── Section Header ── */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          {/* Badge */}
-          <span
-            className="
-            inline-flex items-center gap-2
-            px-4 py-1.5
-            rounded-full
-            bg-blue-50 border border-blue-100
-            text-[#3B82F6] text-xs font-semibold
-            tracking-wide uppercase
-            mb-5
-          "
-          >
-            Features
-          </span>
+        {/* ── Section Header — Split Layout ── */}
+        <div
+          className="
+          flex flex-col lg:flex-row
+          lg:items-end lg:justify-between
+          gap-4 lg:gap-12
+          mb-14 lg:mb-16
+        "
+        >
+          {/* Left side */}
+          <div className="max-w-xl">
+            {/* Badge */}
+            <span
+              className="
+              inline-flex items-center gap-2
+              px-4 py-1.5
+              rounded-full
+              bg-blue-50 border border-blue-100
+              text-[#3B82F6] text-xs font-semibold
+              tracking-wide uppercase
+              mb-4
+            "
+            >
+              Features
+            </span>
 
-          {/* Heading */}
-          <h2
-            className="
-            text-3xl lg:text-4xl
-            font-bold text-[#0F172A]
-            tracking-tight
-            mb-4
-          "
-          >
-            Everything Your Hospital Needs
-          </h2>
+            {/* Heading */}
+            <h2
+              className="
+              text-3xl lg:text-4xl
+              font-bold text-[#0F172A]
+              tracking-tight
+              leading-tight
+            "
+            >
+              Everything Your
+              <br className="hidden sm:block" />
+              Hospital Needs
+            </h2>
+          </div>
 
-          {/* Subtext */}
+          {/* Right side */}
           <p
             className="
-            text-[#64748B] text-lg
+            text-[#64748B] text-base lg:text-lg
             leading-relaxed
+            max-w-md
+            lg:text-right
           "
           >
-            A complete suite of tools designed specifically for healthcare
-            professionals to run their hospital efficiently and deliver better
-            patient care.
+            A complete suite of tools designed for healthcare professionals to
+            run their hospital efficiently and deliver better patient care.
           </p>
         </div>
 
