@@ -1,12 +1,9 @@
+import DashboardShell from '@/components/layout/DashboardShell'
+
 export default function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  return (
-    <div className="min-h-screen bg-[var(--color-background)]">
-      {/* Phase 3 will build Sidebar + Navbar here */}
-      {children}
-    </div>
-  );
+  return <DashboardShell>{children}</DashboardShell>
 }
