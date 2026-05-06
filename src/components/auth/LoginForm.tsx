@@ -12,8 +12,12 @@ import {
   ArrowRight,
   Loader2,
   AlertCircle,
+  Sparkles,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+
+const DEMO_EMAIL = 'demo@medicore.com'
+const DEMO_PASSWORD = 'demo1234'
 
 export default function LoginForm() {
   const router = useRouter()
@@ -44,6 +48,12 @@ export default function LoginForm() {
 
     router.push('/dashboard')
     router.refresh()
+  }
+
+  const fillDemo = () => {
+    setEmail(DEMO_EMAIL)
+    setPassword(DEMO_PASSWORD)
+    setError('')
   }
 
   return (
@@ -274,6 +284,37 @@ export default function LoginForm() {
             )}
           </motion.button>
         </form>
+
+        {/* ── Divider ── */}
+        <div className="flex items-center gap-3 my-5">
+          <div className="flex-1 h-px bg-white/[0.06]" />
+          <span className="text-xs text-white/20">or</span>
+          <div className="flex-1 h-px bg-white/[0.06]" />
+        </div>
+
+        {/* ── Demo Button ── */}
+        <motion.button
+          type="button"
+          onClick={fillDemo}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+          className="
+            w-full h-11
+            bg-indigo-500/10
+            border border-indigo-500/20
+            hover:bg-indigo-500/20
+            hover:border-indigo-500/30
+            text-indigo-300
+            rounded-xl
+            font-semibold text-sm
+            flex items-center justify-center gap-2
+            transition-colors duration-200
+          "
+        >
+          <Sparkles className="w-4 h-4" />
+          Use Demo Credentials
+        </motion.button>
       </motion.div>
 
       {/* Footer */}
