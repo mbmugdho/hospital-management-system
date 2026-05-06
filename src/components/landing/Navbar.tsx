@@ -2,8 +2,17 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { HeartPulse, ArrowRight, Menu, X, LayoutDashboard } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  HeartPulse,
+  ArrowRight,
+  Menu,
+  X,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+} from 'lucide-react'
 import Container from '@/components/shared/Container'
 import { APP_NAME } from '@/lib/constants'
 import { createClient } from '@/lib/supabase/client'
@@ -15,8 +24,11 @@ const navLinks = [
 ]
 
 export default function Navbar() {
+  const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
   const [user, setUser] = useState<{
     email?: string
     full_name?: string
@@ -52,6 +64,27 @@ export default function Navbar() {
       document.body.style.overflow = ''
     }
   }, [mobileOpen])
+
+  /* ── Close dropdown on outside click ── */
+  useEffect(() => {
+    const handleClick = () => setDropdownOpen(false)
+    if (dropdownOpen) {
+      document.addEventListener('click', handleClick)
+      return () => document.removeEventListener('click', handleClick)
+    }
+  }, [dropdownOpen])
+
+  /* ── Logout ── */
+  const handleLogout = async () => {
+    setLoggingOut(true)
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    setUser(null)
+    setDropdownOpen(false)
+    setLoggingOut(false)
+    router.push('/')
+    router.refresh()
+  }
 
   /* ── Get initials ── */
   const getInitials = () => {
@@ -144,16 +177,18 @@ export default function Navbar() {
             className="hidden md:flex items-center gap-3"
           >
             {user ? (
-              /* ── Logged In State ── */
+              /* ══════════════════════════
+                 LOGGED IN — Desktop
+              ══════════════════════════ */
               <div className="flex items-center gap-3">
+                {/* Dashboard Button */}
                 <Link href="/dashboard">
                   <motion.button
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.96 }}
                     className="
                       inline-flex items-center gap-2
-                      bg-white text-black
-                      hover:bg-white/90
+                      bg-white text-black hover:bg-white/90
                       rounded-xl px-5 h-9
                       font-semibold text-sm
                       shadow-md shadow-white/10
@@ -165,27 +200,121 @@ export default function Navbar() {
                   </motion.button>
                 </Link>
 
-                {/* Avatar */}
-                <Link href="/dashboard">
-                  <div
+                {/* Avatar + Dropdown */}
+                <div className="relative">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setDropdownOpen(!dropdownOpen)
+                    }}
                     className="
-                    w-9 h-9 rounded-full
-                    bg-gradient-to-br from-indigo-500 to-purple-500
-                    flex items-center justify-center
-                    border-2 border-white/10
-                    hover:border-white/20
-                    transition-colors duration-200
-                    cursor-pointer
-                  "
+                      w-9 h-9 rounded-full
+                      bg-gradient-to-br from-indigo-500 to-purple-500
+                      flex items-center justify-center
+                      border-2 border-white/10
+                      hover:border-white/25
+                      transition-colors duration-200
+                      cursor-pointer
+                    "
                   >
                     <span className="text-white text-xs font-bold">
                       {getInitials()}
                     </span>
-                  </div>
-                </Link>
+                  </motion.button>
+
+                  {/* Dropdown Menu */}
+                  <AnimatePresence>
+                    {dropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                        transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                        className="
+                          absolute right-0 top-12
+                          w-60
+                          bg-[#111111]
+                          border border-white/[0.08]
+                          rounded-xl
+                          shadow-2xl shadow-black/50
+                          overflow-hidden
+                          z-50
+                        "
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {/* User Info */}
+                        <div className="px-4 py-3 border-b border-white/[0.06]">
+                          <p className="text-sm font-medium text-white/70 truncate">
+                            {user.full_name || 'User'}
+                          </p>
+                          <p className="text-xs text-white/30 truncate">
+                            {user.email}
+                          </p>
+                        </div>
+
+                        {/* Menu Items */}
+                        <div className="py-1.5">
+                          <Link
+                            href="/dashboard"
+                            onClick={() => setDropdownOpen(false)}
+                            className="
+                              flex items-center gap-2.5
+                              px-4 py-2.5
+                              text-sm text-white/50
+                              hover:text-white hover:bg-white/[0.04]
+                              transition-colors duration-150
+                            "
+                          >
+                            <LayoutDashboard className="w-4 h-4" />
+                            Dashboard
+                          </Link>
+
+                          <Link
+                            href="/settings"
+                            onClick={() => setDropdownOpen(false)}
+                            className="
+                              flex items-center gap-2.5
+                              px-4 py-2.5
+                              text-sm text-white/50
+                              hover:text-white hover:bg-white/[0.04]
+                              transition-colors duration-150
+                            "
+                          >
+                            <Settings className="w-4 h-4" />
+                            Settings
+                          </Link>
+                        </div>
+
+                        {/* Logout */}
+                        <div className="border-t border-white/[0.06] py-1.5">
+                          <button
+                            onClick={handleLogout}
+                            disabled={loggingOut}
+                            className="
+                              flex items-center gap-2.5
+                              w-full px-4 py-2.5
+                              text-sm text-red-400/70
+                              hover:text-red-400
+                              hover:bg-red-500/[0.06]
+                              disabled:opacity-50
+                              transition-colors duration-150
+                            "
+                          >
+                            <LogOut className="w-4 h-4" />
+                            {loggingOut ? 'Signing out...' : 'Sign out'}
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
             ) : (
-              /* ── Logged Out State ── */
+              /* ══════════════════════════
+                 LOGGED OUT — Desktop
+              ══════════════════════════ */
               <>
                 <Link
                   href="/login"
@@ -204,8 +333,7 @@ export default function Navbar() {
                     whileTap={{ scale: 0.96 }}
                     className="
                       inline-flex items-center
-                      bg-white text-black
-                      hover:bg-white/90
+                      bg-white text-black hover:bg-white/90
                       rounded-xl px-5 h-9
                       font-semibold text-sm
                       shadow-md shadow-white/10
@@ -282,8 +410,11 @@ export default function Navbar() {
           <div className="my-2 border-t border-white/[0.06]" />
 
           {user ? (
-            /* ── Mobile Logged In ── */
+            /* ══════════════════════════
+               MOBILE — Logged In
+            ══════════════════════════ */
             <>
+              {/* User Info */}
               <div className="flex items-center gap-3 px-4 py-2 mb-2">
                 <div
                   className="
@@ -304,22 +435,65 @@ export default function Navbar() {
                 </div>
               </div>
 
+              {/* Dashboard */}
               <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
+                <div
                   className="
-                    w-full inline-flex items-center justify-center gap-2
-                    bg-white text-black hover:bg-white/90
-                    rounded-xl h-11 font-semibold text-sm
-                  "
+                  flex items-center gap-2.5
+                  px-4 py-3 rounded-xl
+                  text-sm font-medium text-white/50
+                  hover:text-white hover:bg-white/[0.06]
+                  transition-all duration-200
+                "
                 >
                   <LayoutDashboard className="w-4 h-4" />
-                  Go to Dashboard
-                </motion.button>
+                  Dashboard
+                </div>
               </Link>
+
+              {/* Settings */}
+              <Link href="/settings" onClick={() => setMobileOpen(false)}>
+                <div
+                  className="
+                  flex items-center gap-2.5
+                  px-4 py-3 rounded-xl
+                  text-sm font-medium text-white/50
+                  hover:text-white hover:bg-white/[0.06]
+                  transition-all duration-200
+                "
+                >
+                  <Settings className="w-4 h-4" />
+                  Settings
+                </div>
+              </Link>
+
+              <div className="my-2 border-t border-white/[0.06]" />
+
+              {/* Logout */}
+              <button
+                onClick={() => {
+                  setMobileOpen(false)
+                  handleLogout()
+                }}
+                disabled={loggingOut}
+                className="
+                  flex items-center gap-2.5
+                  w-full px-4 py-3 rounded-xl
+                  text-sm font-medium text-red-400/70
+                  hover:text-red-400 hover:bg-red-500/[0.06]
+                  disabled:opacity-50
+                  transition-all duration-200
+                  text-left
+                "
+              >
+                <LogOut className="w-4 h-4" />
+                {loggingOut ? 'Signing out...' : 'Sign out'}
+              </button>
             </>
           ) : (
-            /* ── Mobile Logged Out ── */
+            /* ══════════════════════════
+               MOBILE — Logged Out
+            ══════════════════════════ */
             <>
               <Link
                 href="/login"
