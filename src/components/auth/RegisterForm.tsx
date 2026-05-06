@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   Building2,
@@ -12,9 +13,13 @@ import {
   EyeOff,
   ArrowRight,
   Loader2,
+  AlertCircle,
 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function RegisterForm() {
+  const router = useRouter()
+
   const [form, setForm] = useState({
     hospitalName: '',
     fullName: '',
@@ -33,9 +38,11 @@ export default function RegisterForm() {
     setError('')
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')
 
+    // Validate
     if (form.password !== form.confirmPassword) {
       setError('Passwords do not match')
       return
@@ -46,16 +53,37 @@ export default function RegisterForm() {
       return
     }
 
+    if (!form.hospitalName.trim()) {
+      setError('Hospital name is required')
+      return
+    }
+
     setLoading(true)
 
-    // Simulate registration — replace with real auth later
-    setTimeout(() => {
+    const supabase = createClient()
+
+    const { error } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+      options: {
+        data: {
+          full_name: form.fullName,
+          hospital_name: form.hospitalName,
+        },
+      },
+    })
+
+    if (error) {
+      setError(error.message)
       setLoading(false)
-      window.location.href = '/dashboard'
-    }, 1500)
+      return
+    }
+
+    router.push('/dashboard')
+    router.refresh()
   }
 
-  const fields = [
+  const textFields = [
     {
       id: 'hospitalName',
       label: 'Hospital / Clinic Name',
@@ -89,16 +117,13 @@ export default function RegisterForm() {
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className="w-full max-w-[420px]"
     >
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="text-center mb-8">
         <motion.h1
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.5 }}
-          className="
-            text-2xl font-bold text-white
-            tracking-tight mb-2
-          "
+          className="text-2xl font-bold text-white tracking-tight mb-2"
         >
           Create your account
         </motion.h1>
@@ -112,22 +137,35 @@ export default function RegisterForm() {
         </motion.p>
       </div>
 
-      {/* ── Form Card ── */}
+      {/* Form Card */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
         className="
-          bg-white/[0.03]
-          border border-white/[0.06]
-          rounded-2xl
-          p-6 lg:p-8
-          backdrop-blur-sm
+          bg-white/[0.03] border border-white/[0.06]
+          rounded-2xl p-6 lg:p-8 backdrop-blur-sm
         "
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {/* Error */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="
+                flex items-center gap-2
+                bg-red-500/10 border border-red-500/20
+                rounded-xl px-4 py-3
+              "
+            >
+              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+              <p className="text-xs text-red-400">{error}</p>
+            </motion.div>
+          )}
+
           {/* Text fields */}
-          {fields.map((field, i) => {
+          {textFields.map((field, i) => {
             const Icon = field.icon
             return (
               <motion.div
@@ -163,12 +201,9 @@ export default function RegisterForm() {
                     required
                     className="
                       w-full h-11
-                      bg-white/[0.04]
-                      border border-white/[0.08]
-                      rounded-xl
-                      pl-10 pr-4
-                      text-sm text-white
-                      placeholder:text-white/20
+                      bg-white/[0.04] border border-white/[0.08]
+                      rounded-xl pl-10 pr-4
+                      text-sm text-white placeholder:text-white/20
                       focus:outline-none
                       focus:border-indigo-500/50
                       focus:ring-1 focus:ring-indigo-500/30
@@ -184,7 +219,7 @@ export default function RegisterForm() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ delay: 0.4, duration: 0.4 }}
             className="flex flex-col gap-1.5"
           >
             <label
@@ -209,12 +244,9 @@ export default function RegisterForm() {
                 required
                 className="
                   w-full h-11
-                  bg-white/[0.04]
-                  border border-white/[0.08]
-                  rounded-xl
-                  pl-10 pr-11
-                  text-sm text-white
-                  placeholder:text-white/20
+                  bg-white/[0.04] border border-white/[0.08]
+                  rounded-xl pl-10 pr-11
+                  text-sm text-white placeholder:text-white/20
                   focus:outline-none
                   focus:border-indigo-500/50
                   focus:ring-1 focus:ring-indigo-500/30
@@ -243,7 +275,7 @@ export default function RegisterForm() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ delay: 0.45, duration: 0.4 }}
             className="flex flex-col gap-1.5"
           >
             <label
@@ -262,22 +294,19 @@ export default function RegisterForm() {
               <input
                 id="confirmPassword"
                 type={showConfirm ? 'text' : 'password'}
-                placeholder="Confirm your password"
+                placeholder="Repeat your password"
                 value={form.confirmPassword}
                 onChange={(e) => updateField('confirmPassword', e.target.value)}
                 required
                 className={`
                   w-full h-11
-                  bg-white/[0.04]
-                  rounded-xl
+                  bg-white/[0.04] rounded-xl
                   pl-10 pr-11
-                  text-sm text-white
-                  placeholder:text-white/20
-                  focus:outline-none
-                  transition-all duration-200
+                  text-sm text-white placeholder:text-white/20
+                  focus:outline-none transition-all duration-200
                   ${
-                    error
-                      ? 'border border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30'
+                    error && error.includes('match')
+                      ? 'border border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/20'
                       : 'border border-white/[0.08] focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30'
                   }
                 `}
@@ -300,17 +329,6 @@ export default function RegisterForm() {
             </div>
           </motion.div>
 
-          {/* Error message */}
-          {error && (
-            <motion.p
-              initial={{ opacity: 0, y: -5 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-xs text-red-400 font-medium"
-            >
-              {error}
-            </motion.p>
-          )}
-
           {/* Submit */}
           <motion.button
             type="submit"
@@ -323,8 +341,7 @@ export default function RegisterForm() {
               bg-white text-black
               hover:bg-white/90
               disabled:opacity-60 disabled:cursor-not-allowed
-              rounded-xl
-              font-semibold text-sm
+              rounded-xl font-semibold text-sm
               shadow-lg shadow-white/10
               flex items-center justify-center gap-2
               mt-2
@@ -345,7 +362,7 @@ export default function RegisterForm() {
         </form>
       </motion.div>
 
-      {/* ── Terms ── */}
+      {/* Terms */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -371,24 +388,19 @@ export default function RegisterForm() {
         </Link>
       </motion.p>
 
-      {/* ── Footer ── */}
+      {/* Footer */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.55, duration: 0.5 }}
-        className="
-          text-center text-sm text-white/20
-          mt-4
-        "
+        className="text-center text-sm text-white/20 mt-4"
       >
         Already have an account?{' '}
         <Link
           href="/login"
           className="
-            text-indigo-400/70
-            hover:text-indigo-400
-            font-medium
-            transition-colors duration-200
+            text-indigo-400/70 hover:text-indigo-400
+            font-medium transition-colors duration-200
           "
         >
           Sign in

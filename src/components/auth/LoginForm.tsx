@@ -2,25 +2,48 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react'
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  Loader2,
+  AlertCircle,
+} from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginForm() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
   const [remember, setRemember] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError('')
 
-    // Simulate login — replace with real auth later
-    setTimeout(() => {
+    const supabase = createClient()
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (error) {
+      setError(error.message)
       setLoading(false)
-      window.location.href = '/dashboard'
-    }, 1500)
+      return
+    }
+
+    router.push('/dashboard')
+    router.refresh()
   }
 
   return (
@@ -30,16 +53,13 @@ export default function LoginForm() {
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className="w-full max-w-[420px]"
     >
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="text-center mb-8">
         <motion.h1
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.5 }}
-          className="
-            text-2xl font-bold text-white
-            tracking-tight mb-2
-          "
+          className="text-2xl font-bold text-white tracking-tight mb-2"
         >
           Welcome back
         </motion.h1>
@@ -53,20 +73,33 @@ export default function LoginForm() {
         </motion.p>
       </div>
 
-      {/* ── Form Card ── */}
+      {/* Form Card */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
         className="
-          bg-white/[0.03]
-          border border-white/[0.06]
-          rounded-2xl
-          p-6 lg:p-8
-          backdrop-blur-sm
+          bg-white/[0.03] border border-white/[0.06]
+          rounded-2xl p-6 lg:p-8 backdrop-blur-sm
         "
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          {/* Error */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="
+                flex items-center gap-2
+                bg-red-500/10 border border-red-500/20
+                rounded-xl px-4 py-3
+              "
+            >
+              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+              <p className="text-xs text-red-400">{error}</p>
+            </motion.div>
+          )}
+
           {/* Email */}
           <div className="flex flex-col gap-1.5">
             <label
@@ -87,16 +120,16 @@ export default function LoginForm() {
                 type="email"
                 placeholder="you@hospital.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                  setError('')
+                }}
                 required
                 className="
                   w-full h-11
-                  bg-white/[0.04]
-                  border border-white/[0.08]
-                  rounded-xl
-                  pl-10 pr-4
-                  text-sm text-white
-                  placeholder:text-white/20
+                  bg-white/[0.04] border border-white/[0.08]
+                  rounded-xl pl-10 pr-4
+                  text-sm text-white placeholder:text-white/20
                   focus:outline-none
                   focus:border-indigo-500/50
                   focus:ring-1 focus:ring-indigo-500/30
@@ -126,16 +159,16 @@ export default function LoginForm() {
                 type={showPass ? 'text' : 'password'}
                 placeholder="Enter your password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  setError('')
+                }}
                 required
                 className="
                   w-full h-11
-                  bg-white/[0.04]
-                  border border-white/[0.08]
-                  rounded-xl
-                  pl-10 pr-11
-                  text-sm text-white
-                  placeholder:text-white/20
+                  bg-white/[0.04] border border-white/[0.08]
+                  rounded-xl pl-10 pr-11
+                  text-sm text-white placeholder:text-white/20
                   focus:outline-none
                   focus:border-indigo-500/50
                   focus:ring-1 focus:ring-indigo-500/30
@@ -166,9 +199,9 @@ export default function LoginForm() {
               <div
                 onClick={() => setRemember(!remember)}
                 className={`
-                  w-4 h-4 rounded
-                  border transition-all duration-200
+                  w-4 h-4 rounded border
                   flex items-center justify-center
+                  transition-all duration-200 cursor-pointer
                   ${
                     remember
                       ? 'bg-indigo-500 border-indigo-500'
@@ -222,8 +255,7 @@ export default function LoginForm() {
               bg-white text-black
               hover:bg-white/90
               disabled:opacity-60 disabled:cursor-not-allowed
-              rounded-xl
-              font-semibold text-sm
+              rounded-xl font-semibold text-sm
               shadow-lg shadow-white/10
               flex items-center justify-center gap-2
               mt-1
@@ -244,24 +276,19 @@ export default function LoginForm() {
         </form>
       </motion.div>
 
-      {/* ── Footer ── */}
+      {/* Footer */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.5 }}
-        className="
-          text-center text-sm text-white/20
-          mt-6
-        "
+        className="text-center text-sm text-white/20 mt-6"
       >
         Don&apos;t have an account?{' '}
         <Link
           href="/register"
           className="
-            text-indigo-400/70
-            hover:text-indigo-400
-            font-medium
-            transition-colors duration-200
+            text-indigo-400/70 hover:text-indigo-400
+            font-medium transition-colors duration-200
           "
         >
           Create one
