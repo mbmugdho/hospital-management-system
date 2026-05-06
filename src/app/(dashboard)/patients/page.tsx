@@ -30,6 +30,7 @@ export default function PatientsPage() {
         <PatientFilters active={filter} onChange={setFilter} />
 
         {/* Table */}
+
         <PatientTable search={search} filter={filter} />
       </div>
     </div>
