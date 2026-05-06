@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowRight, HeartPulse, CheckCircle2 } from 'lucide-react'
+import { ArrowRight, HeartPulse } from 'lucide-react'
 import Container from '@/components/shared/Container'
 import AnimateIn from '@/components/shared/AnimateIn'
 
@@ -113,8 +113,14 @@ export default function Hero() {
         {/* ══════════════════════════════
             TEXT CONTENT — CENTERED
         ══════════════════════════════ */}
-        <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-16 lg:mb-20">
-          {/* Badge — with shimmer */}
+        <div
+          className="
+          flex flex-col items-center text-center
+          max-w-3xl mx-auto
+          mb-16 lg:mb-20
+        "
+        >
+          {/* Badge — shimmer */}
           <AnimateIn delay={0.1}>
             <span
               className="
@@ -126,7 +132,6 @@ export default function Hero() {
               relative overflow-hidden
             "
             >
-              {/* Shimmer overlay */}
               <span
                 className="
                 absolute inset-0
@@ -140,7 +145,7 @@ export default function Hero() {
             </span>
           </AnimateIn>
 
-          {/* Headline — gradient text animated */}
+          {/* Headline */}
           <AnimateIn delay={0.2}>
             <h1
               className="
@@ -180,7 +185,12 @@ export default function Hero() {
 
           {/* CTA Buttons */}
           <AnimateIn delay={0.4}>
-            <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
+            <div
+              className="
+              flex flex-wrap items-center
+              justify-center gap-3 mb-8
+            "
+            >
               <Link href="/register">
                 <motion.button
                   whileHover={{ scale: 1.03, y: -2 }}
@@ -188,8 +198,7 @@ export default function Hero() {
                   transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                   className="
                     inline-flex items-center
-                    bg-white text-black
-                    hover:bg-white/90
+                    bg-white text-black hover:bg-white/90
                     rounded-xl px-7 h-12
                     font-semibold text-sm
                     shadow-lg shadow-white/10
@@ -225,7 +234,7 @@ export default function Hero() {
           {/* Trust */}
           <AnimateIn delay={0.5}>
             <div className="flex flex-col sm:flex-row items-center gap-4">
-              {/* Avatars */}
+              {/* Avatar stack */}
               <div className="flex items-center gap-3">
                 <div className="flex -space-x-2.5">
                   {avatars.map((avatar, i) => (
@@ -233,7 +242,10 @@ export default function Hero() {
                       key={avatar.initials}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.6 + i * 0.08, duration: 0.3 }}
+                      transition={{
+                        delay: 0.6 + i * 0.08,
+                        duration: 0.3,
+                      }}
                       className={`
                         w-7 h-7 rounded-full
                         bg-gradient-to-br ${avatar.color}
@@ -291,7 +303,7 @@ export default function Hero() {
         ══════════════════════════════ */}
         <AnimateIn delay={0.6} duration={0.9} blur={false}>
           <div className="relative max-w-[1200px] mx-auto">
-            {/* Glow — animated pulse */}
+            {/* Glow behind mockup */}
             <div
               className="
               absolute -inset-4 lg:-inset-8
@@ -302,22 +314,16 @@ export default function Hero() {
             "
             />
 
-            {/* Dashboard frame — floats */}
-            <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }}
+            {/* Dashboard Frame — static, no float */}
+            <div
               className="
-                relative
-                rounded-xl lg:rounded-2xl
-                border border-white/[0.08]
-                bg-[#0A0A0A]
-                shadow-2xl shadow-black/50
-                overflow-hidden
-              "
+              relative
+              rounded-xl lg:rounded-2xl
+              border border-white/[0.08]
+              bg-[#0A0A0A]
+              shadow-2xl shadow-black/50
+              overflow-hidden
+            "
             >
               {/* Browser Chrome */}
               <div
@@ -359,7 +365,13 @@ export default function Hero() {
                   p-4 flex-col gap-1
                 "
                 >
-                  <div className="flex items-center gap-2.5 px-3 py-2.5 mb-4">
+                  {/* Logo */}
+                  <div
+                    className="
+                    flex items-center gap-2.5
+                    px-3 py-2.5 mb-4
+                  "
+                  >
                     <div
                       className="
                       w-7 h-7 rounded-lg
@@ -374,6 +386,7 @@ export default function Hero() {
                     </span>
                   </div>
 
+                  {/* Nav items */}
                   {sidebarItems.map((item, i) => (
                     <motion.div
                       key={item.label}
@@ -397,7 +410,11 @@ export default function Hero() {
                       <div
                         className={`
                         w-1.5 h-1.5 rounded-full
-                        ${item.active ? 'bg-indigo-400 animate-pulse' : 'bg-white/20'}
+                        ${
+                          item.active
+                            ? 'bg-indigo-400 animate-pulse'
+                            : 'bg-white/20'
+                        }
                       `}
                       />
                       {item.label}
@@ -494,7 +511,7 @@ export default function Hero() {
                         {chartBars.map((bar, i) => (
                           <motion.div
                             key={i}
-                            initial={{ scaleY: 0, originY: 1 }}
+                            initial={{ scaleY: 0 }}
                             animate={{ scaleY: 1 }}
                             transition={{
                               delay: 1.0 + i * 0.04,
@@ -522,7 +539,12 @@ export default function Hero() {
                       rounded-xl p-4
                     "
                     >
-                      <span className="text-xs font-medium text-white/40 block mb-3">
+                      <span
+                        className="
+                        text-xs font-medium text-white/40
+                        block mb-3
+                      "
+                      >
                         Recent Patients
                       </span>
                       <div className="flex flex-col gap-2.5">
@@ -543,7 +565,8 @@ export default function Hero() {
                               w-7 h-7 rounded-full
                               bg-gradient-to-br from-white/10 to-white/5
                               border border-white/[0.08]
-                              flex items-center justify-center flex-shrink-0
+                              flex items-center justify-center
+                              flex-shrink-0
                             "
                             >
                               <span className="text-white/60 text-[9px] font-bold">
@@ -576,7 +599,7 @@ export default function Hero() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Bottom fade */}
             <div
@@ -586,7 +609,7 @@ export default function Hero() {
               bg-gradient-to-t from-black via-black/90 to-transparent
               pointer-events-none
               rounded-b-2xl
-            "  
+            "
             />
           </div>
         </AnimateIn>
