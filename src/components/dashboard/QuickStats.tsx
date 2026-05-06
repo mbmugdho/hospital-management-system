@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   Stethoscope,
@@ -10,6 +11,7 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 
+// ── Data ─────────────────────────────────────────────────────────
 const stats = [
   {
     label: 'Doctors on Duty',
@@ -63,27 +65,27 @@ const stats = [
 
 const colorMap: Record<string, { icon: string; bar: string; text: string }> = {
   indigo: {
-    icon: 'bg-indigo-500/10 text-indigo-400',
+    icon: 'bg-indigo-500/10  text-indigo-400',
     bar: 'bg-indigo-500',
     text: 'text-indigo-400',
   },
   violet: {
-    icon: 'bg-violet-500/10 text-violet-400',
+    icon: 'bg-violet-500/10  text-violet-400',
     bar: 'bg-violet-500',
     text: 'text-violet-400',
   },
   sky: {
-    icon: 'bg-sky-500/10 text-sky-400',
+    icon: 'bg-sky-500/10     text-sky-400',
     bar: 'bg-sky-500',
     text: 'text-sky-400',
   },
   amber: {
-    icon: 'bg-amber-500/10 text-amber-400',
+    icon: 'bg-amber-500/10   text-amber-400',
     bar: 'bg-amber-500',
     text: 'text-amber-400',
   },
   red: {
-    icon: 'bg-red-500/10 text-red-400',
+    icon: 'bg-red-500/10     text-red-400',
     bar: 'bg-red-500',
     text: 'text-red-400',
   },
@@ -94,6 +96,7 @@ const colorMap: Record<string, { icon: string; bar: string; text: string }> = {
   },
 }
 
+// ── Animation variants ────────────────────────────────────────────
 const containerVariants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.08 } },
@@ -109,13 +112,30 @@ const itemVariants = {
 }
 
 export default function QuickStats() {
+  // ✅ Fix: null on server, real time only after client mounts
+  const [time, setTime] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Set immediately on mount
+    setTime(new Date().toLocaleTimeString())
+
+    // Live clock — updates every second
+    const interval = setInterval(() => {
+      setTime(new Date().toLocaleTimeString())
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 260, damping: 24, delay: 0.35 }}
-      className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 hover:border-white/[0.10] transition-colors duration-300"
+      className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6
+        hover:border-white/[0.10] transition-colors duration-300"
     >
+      {/* ── Header ── */}
       <div className="mb-5">
         <h2 className="text-white font-semibold text-base">Hospital Status</h2>
         <p className="text-white/40 text-xs mt-0.5">
@@ -123,6 +143,7 @@ export default function QuickStats() {
         </p>
       </div>
 
+      {/* ── Stat rows ── */}
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -138,7 +159,7 @@ export default function QuickStats() {
             <motion.div key={stat.label} variants={itemVariants}>
               <div className="flex items-center gap-3 mb-2">
                 <div
-                  className={`p-1.5 rounded-lg ${colors.icon} flex-shrink-0`}
+                  className={`p-1.5 rounded-lg flex-shrink-0 ${colors.icon}`}
                 >
                   <Icon className="w-3.5 h-3.5" />
                 </div>
@@ -167,7 +188,7 @@ export default function QuickStats() {
                     duration: 0.8,
                     ease: [0.34, 1.56, 0.64, 1],
                   }}
-                  className={`h-full rounded-full ${colors.bar} opacity-80`}
+                  className={`h-full rounded-full opacity-80 ${colors.bar}`}
                 />
               </div>
             </motion.div>
@@ -175,12 +196,16 @@ export default function QuickStats() {
         })}
       </motion.div>
 
-      {/* Footer note */}
+      {/* ── Footer — live clock ── */}
       <div className="mt-5 pt-5 border-t border-white/[0.06]">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span
+            className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse
+            flex-shrink-0"
+          />
           <span className="text-white/30 text-xs">
-            Last updated {new Date().toLocaleTimeString()}
+            {/* ✅ null on server = no text = no mismatch */}
+            {time ? `Last updated ${time}` : 'Loading...'}
           </span>
         </div>
       </div>
