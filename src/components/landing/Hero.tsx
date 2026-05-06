@@ -1,64 +1,97 @@
 'use client'
 
 import Link from 'next/link'
-import {
-  ArrowRight,
-  HeartPulse,
-  Users,
-  CalendarDays,
-  Receipt,
-  CheckCircle2,
-} from 'lucide-react'
+import { ArrowRight, HeartPulse, CheckCircle2 } from 'lucide-react'
 import Container from '@/components/shared/Container'
 import AnimateIn from '@/components/shared/AnimateIn'
 
 /* ═══════════════════════════════════════════
-   DASHBOARD MOCKUP DATA (same as before)
+   DASHBOARD MOCKUP DATA
 ═══════════════════════════════════════════ */
 
 const statCards = [
   {
     label: 'Total Patients',
     value: '1,240',
-    color: 'text-[#3B82F6]',
-    bg: 'bg-blue-50',
+    color: 'text-blue-400',
+    bg: 'bg-blue-500/10',
   },
   {
     label: 'Appointments',
     value: '48',
-    color: 'text-[#10B981]',
-    bg: 'bg-emerald-50',
+    color: 'text-emerald-400',
+    bg: 'bg-emerald-500/10',
   },
   {
     label: 'Revenue',
-    value: '$24k',
-    color: 'text-[#8B5CF6]',
-    bg: 'bg-violet-50',
+    value: '$24.5k',
+    color: 'text-violet-400',
+    bg: 'bg-violet-500/10',
+  },
+  {
+    label: 'New Today',
+    value: '12',
+    color: 'text-orange-400',
+    bg: 'bg-orange-500/10',
   },
 ]
 
 const chartBars = [
+  { height: '35%', active: false },
+  { height: '55%', active: false },
   { height: '40%', active: false },
+  { height: '70%', active: false },
+  { height: '50%', active: false },
+  { height: '85%', active: true },
   { height: '65%', active: false },
   { height: '45%', active: false },
-  { height: '80%', active: false },
-  { height: '55%', active: false },
-  { height: '90%', active: true },
-  { height: '70%', active: false },
+  { height: '75%', active: false },
+  { height: '60%', active: false },
+  { height: '90%', active: false },
+  { height: '50%', active: false },
 ]
 
 const miniPatients = [
-  { name: 'James Thornton', status: 'Active', color: 'bg-blue-400' },
-  { name: 'Maria Gonzalez', status: 'Admitted', color: 'bg-emerald-400' },
-  { name: 'David Park', status: 'Active', color: 'bg-violet-400' },
+  {
+    name: 'James Thornton',
+    role: 'Cardiology',
+    status: 'Active',
+    statusColor: 'bg-emerald-500/20 text-emerald-400',
+  },
+  {
+    name: 'Maria Gonzalez',
+    role: 'Neurology',
+    status: 'Admitted',
+    statusColor: 'bg-blue-500/20 text-blue-400',
+  },
+  {
+    name: 'David Park',
+    role: 'Orthopedics',
+    status: 'Active',
+    statusColor: 'bg-emerald-500/20 text-emerald-400',
+  },
+  {
+    name: 'Emily Carter',
+    role: 'Pediatrics',
+    status: 'Pending',
+    statusColor: 'bg-amber-500/20 text-amber-400',
+  },
+  {
+    name: 'Robert Williams',
+    role: 'Emergency',
+    status: 'Active',
+    statusColor: 'bg-emerald-500/20 text-emerald-400',
+  },
 ]
 
 const sidebarItems = [
   { label: 'Dashboard', active: true },
   { label: 'Patients', active: false },
   { label: 'Appointments', active: false },
+  { label: 'Doctors', active: false },
   { label: 'Billing', active: false },
   { label: 'Pharmacy', active: false },
+  { label: 'Settings', active: false },
 ]
 
 /* ═══════════════════════════════════════════
@@ -67,345 +100,460 @@ const sidebarItems = [
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden bg-white">
-      {/* ── Background Decorations (same as before) ── */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-[700px] h-[700px] rounded-full bg-gradient-to-br from-blue-50 to-indigo-50 opacity-70 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-emerald-50 to-cyan-50 opacity-60 blur-3xl" />
-        <div
-          className="absolute inset-0 opacity-[0.015]"
-          style={{
-            backgroundImage: `radial-gradient(circle, #0F172A 1px, transparent 1px)`,
-            backgroundSize: '32px 32px',
-          }}
-        />
-      </div>
+    <section className="relative pt-16 lg:pt-24 pb-0 overflow-visible">
+      <Container>
+        {/* ══════════════════════════════
+            TEXT CONTENT — CENTERED
+        ══════════════════════════════ */}
+        <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-16 lg:mb-20">
+          {/* Badge */}
+          <AnimateIn delay={0.1}>
+            <span
+              className="
+              inline-flex items-center gap-2
+              px-4 py-1.5
+              rounded-full
+              bg-white/[0.06]
+              border border-white/[0.08]
+              text-white/60 text-xs font-semibold
+              tracking-wide uppercase
+              mb-6
+            "
+            >
+              <HeartPulse className="w-3.5 h-3.5 text-indigo-400" />
+              Hospital Management System
+            </span>
+          </AnimateIn>
 
-      <Container className="relative">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center pt-16 pb-20 lg:pt-24 lg:pb-28">
-          {/* ══════════════════════════════
-              LEFT — TEXT CONTENT (animated)
-          ══════════════════════════════ */}
-          <div className="flex flex-col gap-7">
-            {/* Pill Badge */}
-            <AnimateIn delay={0.1}>
-              <div className="inline-flex">
-                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-semibold tracking-wide uppercase">
-                  <HeartPulse className="w-3.5 h-3.5" />
-                  Hospital Management System
-                </span>
-              </div>
-            </AnimateIn>
+          {/* Headline */}
+          <AnimateIn delay={0.2}>
+            <h1
+              className="
+              text-4xl sm:text-5xl lg:text-6xl xl:text-7xl
+              font-bold text-white
+              leading-[1.05]
+              tracking-tight
+              mb-6
+            "
+            >
+              The Modern Way to Manage Your{' '}
+              <span
+                className="
+                bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400
+                bg-clip-text text-transparent
+              "
+              >
+                Hospital
+              </span>
+            </h1>
+          </AnimateIn>
 
-            {/* Headline */}
-            <AnimateIn delay={0.2}>
-              <h1 className="text-4xl lg:text-5xl xl:text-[56px] font-bold text-[#0F172A] leading-[1.08] tracking-tight">
-                The Modern Way
-                <br />
-                to Manage Your{' '}
-                <span className="relative inline-block text-[#3B82F6]">
-                  Hospital
-                  <svg
-                    className="absolute -bottom-2 left-0 w-full"
-                    viewBox="0 0 200 8"
-                    fill="none"
-                    preserveAspectRatio="none"
-                  >
-                    <path
-                      d="M0 6 Q50 0 100 4 Q150 8 200 2"
-                      stroke="#93C5FD"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      fill="none"
-                    />
-                  </svg>
-                </span>
-              </h1>
-            </AnimateIn>
+          {/* Subtext */}
+          <AnimateIn delay={0.3}>
+            <p
+              className="
+              text-base lg:text-lg
+              text-white/40
+              leading-relaxed
+              max-w-2xl
+              mb-8
+            "
+            >
+              Streamline patients, appointments, billing, and pharmacy
+              management — all in one powerful platform built for modern
+              healthcare professionals.
+            </p>
+          </AnimateIn>
 
-            {/* Subtext */}
-            <AnimateIn delay={0.3}>
-              <p className="text-lg text-[#64748B] leading-relaxed max-w-[480px]">
-                Streamline patients, appointments, billing, and pharmacy
-                management — all in one powerful platform built for modern
-                healthcare professionals.
-              </p>
-            </AnimateIn>
+          {/* CTA Buttons */}
+          <AnimateIn delay={0.4}>
+            <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
+              <Link href="/register">
+                <button
+                  className="
+                  inline-flex items-center
+                  bg-white text-black
+                  hover:bg-white/90
+                  rounded-xl px-7 h-12
+                  font-semibold text-sm
+                  shadow-lg shadow-white/10
+                  hover:shadow-xl hover:shadow-white/20
+                  hover:-translate-y-0.5
+                  transition-all duration-300
+                "
+                >
+                  Start for Free
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </button>
+              </Link>
 
-            {/* CTA Buttons */}
-            <AnimateIn delay={0.4}>
-              <div className="flex flex-wrap items-center gap-3 pt-1">
-                <Link href="/register">
-                  <button className="inline-flex items-center bg-gradient-to-r from-[#3B82F6] to-[#2563EB] hover:from-[#2563EB] hover:to-[#1D4ED8] text-white rounded-xl px-7 h-12 font-semibold text-sm shadow-lg shadow-blue-200 hover:shadow-xl hover:shadow-blue-200 hover:-translate-y-0.5 transition-all duration-300">
-                    Start for Free
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </button>
-                </Link>
-                <Link href="/login">
-                  <button className="inline-flex items-center bg-white hover:bg-[#F8FAFC] text-[#0F172A] rounded-xl px-7 h-12 font-semibold text-sm border border-[#E2E8F0] hover:border-[#CBD5E1] shadow-sm hover:-translate-y-0.5 transition-all duration-300">
-                    View Demo
-                  </button>
-                </Link>
-              </div>
-            </AnimateIn>
+              <Link href="/login">
+                <button
+                  className="
+                  inline-flex items-center
+                  bg-white/[0.06]
+                  hover:bg-white/[0.1]
+                  text-white
+                  rounded-xl px-7 h-12
+                  font-semibold text-sm
+                  border border-white/[0.08]
+                  hover:border-white/[0.15]
+                  hover:-translate-y-0.5
+                  transition-all duration-300
+                "
+                >
+                  View Demo
+                </button>
+              </Link>
+            </div>
+          </AnimateIn>
 
-            {/* Trust Badges */}
-            <AnimateIn delay={0.5}>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-2">
-                <div className="flex items-center gap-3">
-                  <div className="flex -space-x-2.5">
-                    {[
-                      { initials: 'JT', color: 'from-blue-400 to-blue-500' },
-                      {
-                        initials: 'MG',
-                        color: 'from-emerald-400 to-emerald-500',
-                      },
-                      {
-                        initials: 'DP',
-                        color: 'from-violet-400 to-violet-500',
-                      },
-                      {
-                        initials: 'EC',
-                        color: 'from-orange-400 to-orange-500',
-                      },
-                    ].map((avatar) => (
-                      <div
-                        key={avatar.initials}
-                        className={`w-8 h-8 rounded-full bg-gradient-to-br ${avatar.color} border-2 border-white flex items-center justify-center shadow-sm`}
-                      >
-                        <span className="text-white text-[9px] font-bold">
-                          {avatar.initials}
-                        </span>
-                      </div>
-                    ))}
-                    <div className="w-8 h-8 rounded-full bg-[#F1F5F9] border-2 border-white flex items-center justify-center shadow-sm">
-                      <span className="text-[#64748B] text-[9px] font-bold">
-                        +496
+          {/* Trust */}
+          <AnimateIn delay={0.5}>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex -space-x-2.5">
+                  {[
+                    { initials: 'JT', color: 'from-blue-400 to-blue-500' },
+                    {
+                      initials: 'MG',
+                      color: 'from-emerald-400 to-emerald-500',
+                    },
+                    { initials: 'DP', color: 'from-violet-400 to-violet-500' },
+                    { initials: 'EC', color: 'from-orange-400 to-orange-500' },
+                  ].map((avatar) => (
+                    <div
+                      key={avatar.initials}
+                      className={`
+                        w-7 h-7 rounded-full
+                        bg-gradient-to-br ${avatar.color}
+                        border-2 border-black
+                        flex items-center justify-center
+                      `}
+                    >
+                      <span className="text-white text-[8px] font-bold">
+                        {avatar.initials}
                       </span>
                     </div>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-[#0F172A]">
-                      500+ Hospitals
-                    </p>
-                    <p className="text-xs text-[#64748B]">trust MediCore</p>
-                  </div>
+                  ))}
                 </div>
-                <div className="hidden sm:block w-px h-8 bg-[#E2E8F0]" />
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-0.5">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <svg
-                        key={star}
-                        className="w-4 h-4 text-amber-400 fill-amber-400"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
-                  </div>
-                  <p className="text-sm text-[#64748B]">
-                    <span className="font-semibold text-[#0F172A]">4.9</span>{' '}
-                    rating
-                  </p>
-                </div>
+                <p className="text-sm text-white/40">
+                  Trusted by{' '}
+                  <span className="font-semibold text-white/70">500+</span>{' '}
+                  hospitals
+                </p>
               </div>
-            </AnimateIn>
 
-            {/* Feature pills */}
-            <AnimateIn delay={0.6}>
-              <div className="flex flex-wrap gap-2 pt-1">
-                {[
-                  { icon: Users, text: 'Patient Management' },
-                  { icon: CalendarDays, text: 'Appointments' },
-                  { icon: Receipt, text: 'Billing' },
-                  { icon: CheckCircle2, text: 'HIPAA Compliant' },
-                ].map((item) => {
-                  const Icon = item.icon
-                  return (
-                    <span
-                      key={item.text}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] text-xs font-medium text-[#64748B]"
+              <div className="hidden sm:block w-px h-4 bg-white/[0.1]" />
+
+              <div className="flex items-center gap-1.5">
+                <div className="flex gap-0.5">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg
+                      key={star}
+                      className="w-3.5 h-3.5 text-amber-400 fill-amber-400"
+                      viewBox="0 0 20 20"
                     >
-                      <Icon className="w-3.5 h-3.5 text-[#3B82F6]" />
-                      {item.text}
-                    </span>
-                  )
-                })}
-              </div>
-            </AnimateIn>
-          </div>
-
-          {/* ══════════════════════════════
-              RIGHT — DASHBOARD MOCKUP (animated)
-          ══════════════════════════════ */}
-          <AnimateIn
-            direction="right"
-            delay={0.3}
-            duration={0.7}
-            className="relative hidden lg:flex justify-center items-center"
-          >
-            {/* Glow */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl blur-3xl opacity-40" />
-
-            {/* Main mockup card */}
-            <div className="relative w-full max-w-[520px] rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl shadow-slate-200 overflow-hidden">
-              {/* Browser bar */}
-              <div className="bg-[#1E293B] px-4 py-3 flex items-center gap-3">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-[#EF4444]" />
-                  <div className="w-3 h-3 rounded-full bg-[#F59E0B]" />
-                  <div className="w-3 h-3 rounded-full bg-[#10B981]" />
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
                 </div>
-                <div className="flex-1 mx-2 h-6 bg-[#334155] rounded-md flex items-center px-3">
-                  <div className="w-3 h-3 rounded-full bg-[#475569] mr-2" />
-                  <div className="h-2 w-32 bg-[#475569] rounded" />
+                <span className="text-sm text-white/40">
+                  <span className="font-semibold text-white/70">4.9</span>{' '}
+                  rating
+                </span>
+              </div>
+            </div>
+          </AnimateIn>
+        </div>
+
+        {/* ══════════════════════════════
+            DASHBOARD MOCKUP — BELOW
+        ══════════════════════════════ */}
+        <AnimateIn delay={0.6} duration={0.8}>
+          <div className="relative max-w-[1200px] mx-auto">
+            {/* Glow behind dashboard */}
+            <div
+              className="
+              absolute -inset-4 lg:-inset-8
+              bg-gradient-to-b from-indigo-500/20 via-purple-500/10 to-transparent
+              rounded-3xl blur-3xl
+              pointer-events-none
+            "
+            />
+
+            {/* Dashboard Frame */}
+            <div
+              className="
+              relative
+              rounded-xl lg:rounded-2xl
+              border border-white/[0.08]
+              bg-[#0A0A0A]
+              shadow-2xl shadow-black/50
+              overflow-hidden
+            "
+            >
+              {/* Browser Chrome */}
+              <div
+                className="
+                bg-[#111111]
+                border-b border-white/[0.06]
+                px-4 py-3
+                flex items-center gap-3
+              "
+              >
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+                  <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
+                  <div className="w-3 h-3 rounded-full bg-[#28C840]" />
+                </div>
+                <div
+                  className="
+                  flex-1 mx-8
+                  h-7
+                  bg-white/[0.04]
+                  border border-white/[0.06]
+                  rounded-lg
+                  flex items-center px-3 gap-2
+                "
+                >
+                  <div className="w-3 h-3 rounded-full bg-white/[0.1]" />
+                  <span className="text-[11px] text-white/20 font-medium">
+                    app.medicore.com/dashboard
+                  </span>
                 </div>
               </div>
 
-              {/* App body */}
-              <div className="flex h-[380px]">
+              {/* App Layout */}
+              <div className="flex min-h-[500px] lg:min-h-[560px]">
                 {/* Sidebar */}
-                <div className="w-[140px] bg-[#1E293B] p-3 flex flex-col gap-0.5">
-                  <div className="flex items-center gap-2 px-2 py-2 mb-3">
-                    <div className="w-6 h-6 rounded-lg bg-[#3B82F6] flex items-center justify-center">
+                <div
+                  className="
+                  hidden sm:flex
+                  w-[200px] lg:w-[220px]
+                  bg-[#0A0A0A]
+                  border-r border-white/[0.06]
+                  p-4
+                  flex-col gap-1
+                "
+                >
+                  {/* Logo */}
+                  <div className="flex items-center gap-2.5 px-3 py-2.5 mb-4">
+                    <div
+                      className="
+                      w-7 h-7 rounded-lg
+                      bg-gradient-to-br from-indigo-500 to-purple-500
+                      flex items-center justify-center
+                    "
+                    >
                       <HeartPulse className="w-3.5 h-3.5 text-white" />
                     </div>
-                    <div className="h-2.5 w-14 bg-[#334155] rounded" />
+                    <span className="text-sm font-bold text-white/80">
+                      MediCore
+                    </span>
                   </div>
+
+                  {/* Nav items */}
                   {sidebarItems.map((item) => (
                     <div
                       key={item.label}
-                      className={`flex items-center gap-2 px-2 py-2 rounded-lg ${item.active ? 'bg-[#3B82F6]/20' : ''}`}
+                      className={`
+                        flex items-center gap-2.5
+                        px-3 py-2 rounded-lg
+                        text-sm
+                        ${
+                          item.active
+                            ? 'bg-white/[0.06] text-white font-medium'
+                            : 'text-white/30'
+                        }
+                      `}
                     >
                       <div
-                        className={`w-3 h-3 rounded ${item.active ? 'bg-[#3B82F6]' : 'bg-[#475569]'}`}
+                        className={`
+                        w-1.5 h-1.5 rounded-full
+                        ${item.active ? 'bg-indigo-400' : 'bg-white/20'}
+                      `}
                       />
-                      <div
-                        className={`h-2 w-12 rounded ${item.active ? 'bg-[#93C5FD]' : 'bg-[#475569]'}`}
-                      />
+                      {item.label}
                     </div>
                   ))}
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 bg-[#F8FAFC] p-4 flex flex-col gap-3 overflow-hidden">
+                {/* Main Content */}
+                <div
+                  className="
+                  flex-1
+                  bg-[#050505]
+                  p-5 lg:p-6
+                  flex flex-col gap-5
+                "
+                >
+                  {/* Top bar */}
                   <div className="flex items-center justify-between">
-                    <div className="h-3 w-24 bg-[#CBD5E1] rounded" />
-                    <div className="h-6 w-20 bg-[#3B82F6] rounded-lg opacity-80" />
+                    <div>
+                      <h3 className="text-sm font-semibold text-white/80">
+                        Dashboard
+                      </h3>
+                      <p className="text-xs text-white/25 mt-0.5">
+                        Welcome back, Dr. Mitchell
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="
+                        h-7 px-3
+                        bg-white/[0.04]
+                        border border-white/[0.06]
+                        rounded-lg
+                        flex items-center
+                        text-[11px] text-white/20
+                      "
+                      >
+                        Last 7 days
+                      </div>
+                      <div
+                        className="
+                        h-7 px-3
+                        bg-indigo-500/20
+                        border border-indigo-500/20
+                        rounded-lg
+                        flex items-center
+                        text-[11px] text-indigo-300 font-medium
+                      "
+                      >
+                        + New Patient
+                      </div>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
+
+                  {/* Stat Cards */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     {statCards.map((card) => (
                       <div
                         key={card.label}
-                        className="bg-white rounded-xl p-3 border border-[#E2E8F0] shadow-sm"
+                        className="
+                          bg-white/[0.02]
+                          border border-white/[0.06]
+                          rounded-xl p-4
+                        "
                       >
-                        <div
-                          className={`w-6 h-6 rounded-lg ${card.bg} flex items-center justify-center mb-2`}
-                        >
-                          <div className="w-3 h-3 rounded bg-current opacity-40" />
-                        </div>
-                        <p className={`text-sm font-bold ${card.color}`}>
-                          {card.value}
-                        </p>
-                        <p className="text-[9px] text-[#94A3B8] mt-0.5">
+                        <p className="text-xs text-white/25 mb-2">
                           {card.label}
+                        </p>
+                        <p className={`text-xl font-bold ${card.color}`}>
+                          {card.value}
                         </p>
                       </div>
                     ))}
                   </div>
-                  <div className="bg-white rounded-xl border border-[#E2E8F0] p-3 shadow-sm">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="h-2.5 w-20 bg-[#E2E8F0] rounded" />
-                      <div className="h-2 w-12 bg-[#F1F5F9] rounded" />
-                    </div>
-                    <div className="flex items-end gap-1.5 h-16">
-                      {chartBars.map((bar, i) => (
-                        <div
-                          key={i}
-                          className="flex-1 rounded-t-md"
-                          style={{
-                            height: bar.height,
-                            backgroundColor: bar.active ? '#3B82F6' : '#E2E8F0',
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-xl border border-[#E2E8F0] p-3 shadow-sm flex-1">
-                    <div className="h-2.5 w-24 bg-[#E2E8F0] rounded mb-3" />
-                    <div className="flex flex-col gap-2">
-                      {miniPatients.map((patient) => (
-                        <div
-                          key={patient.name}
-                          className="flex items-center gap-2"
-                        >
+
+                  {/* Charts + Table Row */}
+                  <div className="grid lg:grid-cols-5 gap-4 flex-1">
+                    {/* Chart */}
+                    <div
+                      className="
+                      lg:col-span-3
+                      bg-white/[0.02]
+                      border border-white/[0.06]
+                      rounded-xl p-4
+                    "
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-xs font-medium text-white/40">
+                          Revenue Overview
+                        </span>
+                        <span className="text-xs text-white/20">This Week</span>
+                      </div>
+                      <div className="flex items-end gap-1.5 h-32">
+                        {chartBars.map((bar, i) => (
                           <div
-                            className={`w-5 h-5 rounded-full ${patient.color} flex items-center justify-center flex-shrink-0`}
+                            key={i}
+                            className="
+                              flex-1 rounded-t-sm
+                              transition-all duration-300
+                            "
+                            style={{
+                              height: bar.height,
+                              backgroundColor: bar.active
+                                ? '#6366F1'
+                                : 'rgba(255,255,255,0.04)',
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Recent Patients */}
+                    <div
+                      className="
+                      lg:col-span-2
+                      bg-white/[0.02]
+                      border border-white/[0.06]
+                      rounded-xl p-4
+                    "
+                    >
+                      <span className="text-xs font-medium text-white/40 block mb-3">
+                        Recent Patients
+                      </span>
+                      <div className="flex flex-col gap-2.5">
+                        {miniPatients.map((patient) => (
+                          <div
+                            key={patient.name}
+                            className="flex items-center gap-3"
                           >
-                            <span className="text-white text-[7px] font-bold">
-                              {patient.name.charAt(0)}
+                            <div
+                              className="
+                              w-7 h-7 rounded-full
+                              bg-gradient-to-br from-white/10 to-white/5
+                              border border-white/[0.08]
+                              flex items-center justify-center
+                              flex-shrink-0
+                            "
+                            >
+                              <span className="text-white/60 text-[9px] font-bold">
+                                {patient.name
+                                  .split(' ')
+                                  .map((n) => n[0])
+                                  .join('')}
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-white/60 truncate">
+                                {patient.name}
+                              </p>
+                              <p className="text-[10px] text-white/20">
+                                {patient.role}
+                              </p>
+                            </div>
+                            <span
+                              className={`
+                              text-[10px] font-medium px-2 py-0.5
+                              rounded-full ${patient.statusColor}
+                            `}
+                            >
+                              {patient.status}
                             </span>
                           </div>
-                          <div className="flex-1 h-2 bg-[#F1F5F9] rounded" />
-                          <div className="h-4 w-10 rounded-full bg-emerald-50 border border-emerald-100" />
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Floating cards */}
-            <AnimateIn
-              delay={0.8}
-              direction="none"
-              className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-xl shadow-slate-200 border border-[#E2E8F0] px-4 py-3 flex items-center gap-3"
-            >
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-              </div>
-              <div>
-                <p className="text-[11px] text-[#64748B]">Appointment</p>
-                <p className="text-sm font-bold text-[#0F172A]">Confirmed ✓</p>
-              </div>
-            </AnimateIn>
-
-            <AnimateIn
-              delay={1.0}
-              direction="none"
-              className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-xl shadow-slate-200 border border-[#E2E8F0] px-4 py-3 flex items-center gap-3"
-            >
-              <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
-                <Users className="w-5 h-5 text-[#3B82F6]" />
-              </div>
-              <div>
-                <p className="text-[11px] text-[#64748B]">New Patient</p>
-                <p className="text-sm font-bold text-[#0F172A]">
-                  Just Registered
-                </p>
-              </div>
-            </AnimateIn>
-
-            <AnimateIn
-              delay={1.2}
-              direction="none"
-              className="absolute top-1/2 -right-6 -translate-y-1/2 bg-white rounded-2xl shadow-xl shadow-slate-200 border border-[#E2E8F0] px-4 py-3"
-            >
-              <p className="text-[11px] text-[#64748B] mb-1">Monthly Revenue</p>
-              <p className="text-sm font-bold text-[#0F172A]">$24,500</p>
-              <div className="flex items-center gap-1 mt-1">
-                <div className="px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-semibold">
-                  ↑ 12%
-                </div>
-                <span className="text-[10px] text-[#94A3B8]">
-                  vs last month
-                </span>
-              </div>
-            </AnimateIn>
-          </AnimateIn>
-        </div>
+            {/* Bottom fade — creates "cut off" effect */}
+            <div
+              className="
+              absolute bottom-0 left-0 right-0
+              h-32
+              bg-gradient-to-t from-black via-black/80 to-transparent
+              pointer-events-none
+              rounded-b-2xl
+            "
+            />
+          </div>
+        </AnimateIn>
       </Container>
     </section>
   )

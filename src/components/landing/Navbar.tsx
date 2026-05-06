@@ -33,10 +33,14 @@ export default function Navbar() {
     <header
       className={`
         sticky top-0 z-50 w-full
-        bg-white/80 backdrop-blur-lg
+        backdrop-blur-xl
         border-b
         transition-all duration-300
-        ${scrolled ? 'border-[#E2E8F0] shadow-sm' : 'border-transparent'}
+        ${
+          scrolled
+            ? 'bg-black/70 border-white/[0.06] shadow-lg shadow-black/20'
+            : 'bg-transparent border-transparent'
+        }
       `}
     >
       <Container>
@@ -45,22 +49,22 @@ export default function Navbar() {
           <Link href="/" className="flex items-center gap-2.5 group">
             <div
               className="
-                w-9 h-9 rounded-xl
-                bg-gradient-to-br from-[#3B82F6] to-[#2563EB]
-                flex items-center justify-center
-                shadow-md shadow-blue-200
-                group-hover:shadow-lg group-hover:shadow-blue-200
-                transition-shadow duration-300
-              "
+              w-9 h-9 rounded-xl
+              bg-gradient-to-br from-[#6366F1] to-[#4F46E5]
+              flex items-center justify-center
+              shadow-md shadow-indigo-500/20
+              group-hover:shadow-lg group-hover:shadow-indigo-500/30
+              transition-shadow duration-300
+            "
             >
               <HeartPulse className="w-[18px] h-[18px] text-white" />
             </div>
-            <span className="text-xl font-bold text-[#0F172A] tracking-tight">
+            <span className="text-xl font-bold text-white tracking-tight">
               {APP_NAME}
             </span>
           </Link>
 
-          {/* Desktop Nav Links */}
+          {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link
@@ -68,8 +72,8 @@ export default function Navbar() {
                 href={link.href}
                 className="
                   px-4 py-2 rounded-lg
-                  text-sm font-medium text-[#64748B]
-                  hover:text-[#0F172A] hover:bg-[#F1F5F9]
+                  text-sm font-medium text-white/50
+                  hover:text-white hover:bg-white/[0.06]
                   transition-all duration-200
                 "
               >
@@ -84,8 +88,8 @@ export default function Navbar() {
               href="/login"
               className="
                 px-4 py-2 rounded-lg
-                text-sm font-medium text-[#64748B]
-                hover:text-[#0F172A] hover:bg-[#F1F5F9]
+                text-sm font-medium text-white/50
+                hover:text-white hover:bg-white/[0.06]
                 transition-all duration-200
               "
             >
@@ -94,15 +98,14 @@ export default function Navbar() {
             <Link href="/register">
               <button
                 className="
-                  inline-flex items-center
-                  bg-gradient-to-r from-[#3B82F6] to-[#2563EB]
-                  hover:from-[#2563EB] hover:to-[#1D4ED8]
-                  text-white rounded-xl px-5 h-9
-                  shadow-md shadow-blue-200
-                  hover:shadow-lg hover:shadow-blue-200
-                  transition-all duration-300
-                  font-semibold text-sm
-                "
+                inline-flex items-center
+                bg-white text-black
+                hover:bg-white/90
+                rounded-xl px-5 h-9
+                font-semibold text-sm
+                shadow-md shadow-white/10
+                transition-all duration-300
+              "
               >
                 Get Started
                 <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
@@ -115,8 +118,8 @@ export default function Navbar() {
             onClick={() => setMobileOpen(!mobileOpen)}
             className="
               md:hidden p-2 rounded-xl
-              text-[#64748B] hover:text-[#0F172A]
-              hover:bg-[#F1F5F9]
+              text-white/50 hover:text-white
+              hover:bg-white/[0.06]
               transition-all duration-200
             "
             aria-label="Toggle menu"
@@ -135,8 +138,9 @@ export default function Navbar() {
         className={`
           md:hidden
           absolute top-16 left-0 right-0
-          bg-white border-b border-[#E2E8F0]
-          shadow-lg
+          bg-black/90 backdrop-blur-xl
+          border-b border-white/[0.06]
+          shadow-lg shadow-black/30
           transition-all duration-300 ease-in-out
           ${
             mobileOpen
@@ -153,8 +157,8 @@ export default function Navbar() {
               onClick={() => setMobileOpen(false)}
               className="
                 px-4 py-3 rounded-xl
-                text-sm font-medium text-[#64748B]
-                hover:text-[#0F172A] hover:bg-[#F1F5F9]
+                text-sm font-medium text-white/50
+                hover:text-white hover:bg-white/[0.06]
                 transition-all duration-200
               "
             >
@@ -162,15 +166,15 @@ export default function Navbar() {
             </Link>
           ))}
 
-          <div className="my-2 border-t border-[#F1F5F9]" />
+          <div className="my-2 border-t border-white/[0.06]" />
 
           <Link
             href="/login"
             onClick={() => setMobileOpen(false)}
             className="
               px-4 py-3 rounded-xl
-              text-sm font-medium text-[#64748B]
-              hover:text-[#0F172A] hover:bg-[#F1F5F9]
+              text-sm font-medium text-white/50
+              hover:text-white hover:bg-white/[0.06]
               transition-all duration-200
             "
           >
@@ -180,14 +184,13 @@ export default function Navbar() {
           <Link href="/register" onClick={() => setMobileOpen(false)}>
             <button
               className="
-                w-full mt-1
-                inline-flex items-center justify-center
-                bg-gradient-to-r from-[#3B82F6] to-[#2563EB]
-                hover:from-[#2563EB] hover:to-[#1D4ED8]
-                text-white rounded-xl h-11
-                shadow-md shadow-blue-200
-                font-semibold text-sm
-              "
+              w-full mt-1
+              inline-flex items-center justify-center
+              bg-white text-black
+              hover:bg-white/90
+              rounded-xl h-11
+              font-semibold text-sm
+            "
             >
               Get Started
               <ArrowRight className="w-3.5 h-3.5 ml-1.5" />

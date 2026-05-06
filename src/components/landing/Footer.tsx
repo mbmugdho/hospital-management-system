@@ -5,12 +5,12 @@ import Container from '@/components/shared/Container'
 import AnimateIn from '@/components/shared/AnimateIn'
 import {
   HeartPulse,
-  Twitter,
-  Linkedin,
-  Github,
   Mail,
   MapPin,
   Phone,
+  Globe,
+  MessageCircle,
+  AtSign,
 } from 'lucide-react'
 import { APP_NAME } from '@/lib/constants'
 
@@ -22,91 +22,68 @@ const footerLinks = [
       { label: 'Pricing', href: '#pricing' },
       { label: 'Security', href: '#' },
       { label: 'Changelog', href: '#' },
-      { label: 'Roadmap', href: '#' },
     ],
   },
   {
     heading: 'Company',
     links: [
-      { label: 'About Us', href: '#' },
+      { label: 'About', href: '#' },
       { label: 'Careers', href: '#' },
       { label: 'Blog', href: '#' },
       { label: 'Press', href: '#' },
-      { label: 'Partners', href: '#' },
     ],
   },
   {
     heading: 'Support',
     links: [
       { label: 'Help Center', href: '#' },
-      { label: 'Documentation', href: '#' },
-      { label: 'API Reference', href: '#' },
+      { label: 'Docs', href: '#' },
       { label: 'Status', href: '#' },
-      { label: 'Contact Us', href: '#' },
-    ],
-  },
-  {
-    heading: 'Legal',
-    links: [
-      { label: 'Privacy Policy', href: '#' },
-      { label: 'Terms of Service', href: '#' },
-      { label: 'Cookie Policy', href: '#' },
-      { label: 'HIPAA Compliance', href: '#' },
-      { label: 'Data Processing', href: '#' },
+      { label: 'Contact', href: '#' },
     ],
   },
 ]
 
 const socialLinks = [
-  { icon: Twitter, href: '#', label: 'Twitter' },
-  { icon: Linkedin, href: '#', label: 'LinkedIn' },
-  { icon: Github, href: '#', label: 'GitHub' },
+  { icon: AtSign, href: '#', label: 'Twitter' },
+  { icon: Globe, href: '#', label: 'LinkedIn' },
+  { icon: MessageCircle, href: '#', label: 'GitHub' },
   { icon: Mail, href: '#', label: 'Email' },
-]
-
-const contactInfo = [
-  { icon: MapPin, text: '123 Medical Drive, Boston, MA 02101' },
-  { icon: Phone, text: '+1 (555) 100-0000' },
-  { icon: Mail, text: 'hello@medicore.com' },
 ]
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0F172A]">
+    <footer className="border-t border-white/[0.06]">
       <Container>
         <AnimateIn>
-          <div className="py-16 lg:py-20">
-            <div className="grid grid-cols-2 lg:grid-cols-6 gap-10 lg:gap-8">
-              {/* Brand Column */}
-              <div className="col-span-2 flex flex-col gap-5">
+          <div className="py-14 lg:py-16">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
+              {/* Brand */}
+              <div className="col-span-2 flex flex-col gap-4">
                 <Link
                   href="/"
-                  className="inline-flex items-center gap-2.5 group w-fit"
+                  className="inline-flex items-center gap-2.5 w-fit"
                 >
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#2563EB] flex items-center justify-center shadow-md shadow-blue-900 group-hover:shadow-lg transition-shadow duration-300">
-                    <HeartPulse className="w-[18px] h-[18px] text-white" />
+                  <div
+                    className="
+                    w-8 h-8 rounded-lg
+                    bg-gradient-to-br from-indigo-500 to-purple-500
+                    flex items-center justify-center
+                  "
+                  >
+                    <HeartPulse className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-xl font-bold text-white tracking-tight">
+                  <span className="text-lg font-bold text-white tracking-tight">
                     {APP_NAME}
                   </span>
                 </Link>
-                <p className="text-sm text-[#64748B] leading-relaxed max-w-[220px]">
-                  Modern hospital management system built for healthcare
-                  professionals who care about efficiency and outcomes.
+
+                <p className="text-sm text-white/20 leading-relaxed max-w-[240px]">
+                  Modern hospital management for healthcare professionals who
+                  care about efficiency.
                 </p>
-                <div className="flex flex-col gap-2.5">
-                  {contactInfo.map((item) => {
-                    const Icon = item.icon
-                    return (
-                      <div key={item.text} className="flex items-start gap-2.5">
-                        <Icon className="w-3.5 h-3.5 text-[#475569] mt-0.5 flex-shrink-0" />
-                        <span className="text-xs text-[#475569] leading-relaxed">
-                          {item.text}
-                        </span>
-                      </div>
-                    )
-                  })}
-                </div>
+
+                {/* Social */}
                 <div className="flex items-center gap-2">
                   {socialLinks.map((social) => {
                     const Icon = social.icon
@@ -115,37 +92,47 @@ export default function Footer() {
                         key={social.label}
                         href={social.href}
                         aria-label={social.label}
-                        className="w-8 h-8 rounded-lg bg-[#1E293B] border border-[#334155] flex items-center justify-center text-[#64748B] hover:text-white hover:bg-[#3B82F6] hover:border-[#3B82F6] transition-all duration-200"
+                        className="
+                          w-8 h-8 rounded-lg
+                          bg-white/[0.03]
+                          border border-white/[0.06]
+                          flex items-center justify-center
+                          text-white/20
+                          hover:text-white
+                          hover:bg-indigo-500/20
+                          hover:border-indigo-500/20
+                          transition-all duration-200
+                        "
                       >
                         <Icon className="w-3.5 h-3.5" />
                       </Link>
                     )
                   })}
                 </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#1E293B] border border-[#334155] w-fit">
-                  <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-                  <span className="text-xs text-[#10B981] font-medium">
-                    All systems operational
-                  </span>
-                </div>
               </div>
 
-              {/* Link Columns */}
+              {/* Links */}
               {footerLinks.map((group) => (
-                <div key={group.heading} className="flex flex-col gap-4">
-                  <h4 className="text-xs font-bold text-white uppercase tracking-widest">
+                <div key={group.heading} className="flex flex-col gap-3">
+                  <h4
+                    className="
+                    text-xs font-semibold text-white/40
+                    uppercase tracking-widest
+                  "
+                  >
                     {group.heading}
                   </h4>
-                  <ul className="flex flex-col gap-2.5">
+                  <ul className="flex flex-col gap-2">
                     {group.links.map((link) => (
                       <li key={link.label}>
                         <Link
                           href={link.href}
-                          className="text-sm text-[#64748B] hover:text-white transition-colors duration-200 relative group/link inline-flex items-center gap-1"
+                          className="
+                            text-sm text-white/20
+                            hover:text-white/60
+                            transition-colors duration-200
+                          "
                         >
-                          <span className="absolute -left-3 opacity-0 group-hover/link:opacity-100 text-[#3B82F6] transition-opacity duration-200 text-xs">
-                            ›
-                          </span>
                           {link.label}
                         </Link>
                       </li>
@@ -158,33 +145,33 @@ export default function Footer() {
         </AnimateIn>
       </Container>
 
-      <div className="border-t border-[#1E293B]" />
-
-      <Container>
-        <div className="py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-[#475569]">
-            © {new Date().getFullYear()} {APP_NAME}, Inc. All rights reserved.
-          </p>
-          <div className="flex items-center gap-5 flex-wrap justify-center">
-            {['Privacy Policy', 'Terms of Service', 'Cookie Settings'].map(
-              (item) => (
+      {/* Bottom */}
+      <div className="border-t border-white/[0.04]">
+        <Container>
+          <div
+            className="
+            py-5
+            flex flex-col sm:flex-row
+            items-center justify-between gap-4
+          "
+          >
+            <p className="text-xs text-white/15">
+              © {new Date().getFullYear()} {APP_NAME}. All rights reserved.
+            </p>
+            <div className="flex items-center gap-5">
+              {['Privacy', 'Terms', 'Cookies'].map((item) => (
                 <Link
                   key={item}
                   href="#"
-                  className="text-xs text-[#475569] hover:text-white transition-colors duration-200"
+                  className="text-xs text-white/15 hover:text-white/40 transition-colors"
                 >
                   {item}
                 </Link>
-              )
-            )}
+              ))}
+            </div>
           </div>
-          <p className="text-xs text-[#475569] flex items-center gap-1">
-            Made with
-            <HeartPulse className="w-3 h-3 text-[#EF4444]" />
-            for healthcare
-          </p>
-        </div>
-      </Container>
+        </Container>
+      </div>
     </footer>
   )
 }
