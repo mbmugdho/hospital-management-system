@@ -586,7 +586,7 @@ export default function Hero() {
               bg-gradient-to-t from-black via-black/90 to-transparent
               pointer-events-none
               rounded-b-2xl
-            "
+            "  
             />
           </div>
         </AnimateIn>
