@@ -1,5 +1,6 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import Container from '@/components/shared/Container'
 import AnimateIn from '@/components/shared/AnimateIn'
 import CountUp from '@/components/shared/CountUp'
@@ -23,6 +24,7 @@ export default function Stats() {
           backdrop-blur-sm
           rounded-2xl
           p-8 lg:p-12
+          animate-border-glow
         "
         >
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
@@ -49,28 +51,29 @@ export default function Stats() {
                     />
                   )}
 
-                  {/* Icon */}
-                  <div
+                  {/* Icon — spins slowly on hover */}
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.8, ease: 'easeInOut' }}
                     className="
-                    w-10 h-10 rounded-xl
-                    bg-white/[0.04]
-                    border border-white/[0.06]
-                    flex items-center justify-center
-                    mb-4
-                    group-hover:bg-white/[0.08]
-                    transition-all duration-300
-                  "
+                      w-10 h-10 rounded-xl
+                      bg-white/[0.04] border border-white/[0.06]
+                      flex items-center justify-center
+                      mb-4
+                      group-hover:bg-indigo-500/10
+                      group-hover:border-indigo-500/20
+                      transition-colors duration-300
+                    "
                   >
                     <Icon className="w-4 h-4 text-indigo-400" />
-                  </div>
+                  </motion.div>
 
                   {/* Value */}
                   <CountUp
                     target={stat.value}
                     className="
-                      text-2xl lg:text-3xl
-                      font-bold text-white
-                      tracking-tight mb-1
+                      text-2xl lg:text-3xl font-bold
+                      text-white tracking-tight mb-1
                     "
                   />
 

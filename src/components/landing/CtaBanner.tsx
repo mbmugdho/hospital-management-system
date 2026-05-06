@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import Container from '@/components/shared/Container'
 import AnimateIn from '@/components/shared/AnimateIn'
 import {
@@ -23,6 +24,7 @@ export default function CtaBanner() {
             border border-white/[0.08]
             bg-gradient-to-br from-indigo-500/20 via-purple-500/10 to-transparent
             p-8 lg:p-14
+            animate-border-glow
           "
           >
             {/* Glow */}
@@ -31,6 +33,7 @@ export default function CtaBanner() {
               absolute -top-20 -right-20
               w-[400px] h-[400px] rounded-full
               bg-indigo-500/10 blur-3xl
+              animate-glow-pulse
               pointer-events-none
             "
             />
@@ -45,16 +48,25 @@ export default function CtaBanner() {
             >
               {/* Left */}
               <div className="max-w-lg">
-                <div
-                  className="
-                  w-12 h-12 rounded-xl
-                  bg-white/[0.06]
-                  border border-white/[0.08]
-                  flex items-center justify-center
-                  mb-5
-                "
-                >
-                  <HeartPulse className="w-6 h-6 text-indigo-400" />
+                {/* Pulsing icon */}
+                <div className="relative w-fit mb-5">
+                  <div
+                    className="
+                    w-12 h-12 rounded-xl
+                    bg-white/[0.06] border border-white/[0.08]
+                    flex items-center justify-center
+                  "
+                  >
+                    <HeartPulse className="w-6 h-6 text-indigo-400" />
+                  </div>
+                  {/* Pulse ring */}
+                  <div
+                    className="
+                    absolute inset-0 rounded-xl
+                    border border-indigo-400/30
+                    animate-pulse-ring
+                  "
+                  />
                 </div>
 
                 <h2
@@ -68,11 +80,7 @@ export default function CtaBanner() {
                   Your Hospital?
                 </h2>
 
-                <p
-                  className="
-                  text-white/30 text-base leading-relaxed mb-6
-                "
-                >
+                <p className="text-white/30 text-base leading-relaxed mb-6">
                   Join 500+ hospitals already using MediCore to streamline
                   operations and deliver better patient care.
                 </p>
@@ -100,40 +108,37 @@ export default function CtaBanner() {
               {/* Right */}
               <div className="flex flex-col gap-3 w-full lg:w-auto lg:min-w-[260px]">
                 <Link href="/register">
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.03, y: -2 }}
+                    whileTap={{ scale: 0.96 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                     className="
-                    w-full inline-flex items-center justify-center
-                    bg-white text-black
-                    hover:bg-white/90
-                    rounded-xl h-12
-                    font-bold text-sm
-                    shadow-lg shadow-white/10
-                    hover:-translate-y-0.5
-                    transition-all duration-300
-                  "
+                      w-full inline-flex items-center justify-center
+                      bg-white text-black hover:bg-white/90
+                      rounded-xl h-12 font-bold text-sm
+                      shadow-lg shadow-white/10
+                    "
                   >
                     Start Free Trial
                     <ArrowRight className="w-4 h-4 ml-2" />
-                  </button>
+                  </motion.button>
                 </Link>
 
                 <Link href="/login">
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.03, y: -2 }}
+                    whileTap={{ scale: 0.96 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                     className="
-                    w-full inline-flex items-center justify-center
-                    bg-white/[0.04]
-                    text-white/60
-                    border border-white/[0.08]
-                    hover:bg-white/[0.08]
-                    hover:text-white
-                    rounded-xl h-12
-                    font-semibold text-sm
-                    hover:-translate-y-0.5
-                    transition-all duration-300
-                  "
+                      w-full inline-flex items-center justify-center
+                      bg-white/[0.04] text-white/60
+                      border border-white/[0.08]
+                      hover:bg-white/[0.08] hover:text-white
+                      rounded-xl h-12 font-semibold text-sm
+                    "
                   >
                     Sign In Instead
-                  </button>
+                  </motion.button>
                 </Link>
               </div>
             </div>

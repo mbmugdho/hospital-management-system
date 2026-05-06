@@ -1,17 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import Container from '@/components/shared/Container'
 import AnimateIn from '@/components/shared/AnimateIn'
-import {
-  HeartPulse,
-  Mail,
-  MapPin,
-  Phone,
-  Globe,
-  MessageCircle,
-  AtSign,
-} from 'lucide-react'
+import { HeartPulse, Mail, Globe, MessageCircle, AtSign } from 'lucide-react'
 import { APP_NAME } from '@/lib/constants'
 
 const footerLinks = [
@@ -62,17 +55,19 @@ export default function Footer() {
               <div className="col-span-2 flex flex-col gap-4">
                 <Link
                   href="/"
-                  className="inline-flex items-center gap-2.5 w-fit"
+                  className="inline-flex items-center gap-2.5 w-fit group"
                 >
-                  <div
+                  <motion.div
+                    whileHover={{ rotate: 10, scale: 1.1 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                     className="
-                    w-8 h-8 rounded-lg
-                    bg-gradient-to-br from-indigo-500 to-purple-500
-                    flex items-center justify-center
-                  "
+                      w-8 h-8 rounded-lg
+                      bg-gradient-to-br from-indigo-500 to-purple-500
+                      flex items-center justify-center
+                    "
                   >
                     <HeartPulse className="w-4 h-4 text-white" />
-                  </div>
+                  </motion.div>
                   <span className="text-lg font-bold text-white tracking-tight">
                     {APP_NAME}
                   </span>
@@ -88,26 +83,50 @@ export default function Footer() {
                   {socialLinks.map((social) => {
                     const Icon = social.icon
                     return (
-                      <Link
+                      <motion.div
                         key={social.label}
-                        href={social.href}
-                        aria-label={social.label}
-                        className="
-                          w-8 h-8 rounded-lg
-                          bg-white/[0.03]
-                          border border-white/[0.06]
-                          flex items-center justify-center
-                          text-white/20
-                          hover:text-white
-                          hover:bg-indigo-500/20
-                          hover:border-indigo-500/20
-                          transition-all duration-200
-                        "
+                        whileHover={{ y: -3, scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 400,
+                          damping: 17,
+                        }}
                       >
-                        <Icon className="w-3.5 h-3.5" />
-                      </Link>
+                        <Link
+                          href={social.href}
+                          aria-label={social.label}
+                          className="
+                            w-8 h-8 rounded-lg
+                            bg-white/[0.03] border border-white/[0.06]
+                            flex items-center justify-center
+                            text-white/20
+                            hover:text-white
+                            hover:bg-indigo-500/20
+                            hover:border-indigo-500/20
+                            transition-colors duration-200
+                          "
+                        >
+                          <Icon className="w-3.5 h-3.5" />
+                        </Link>
+                      </motion.div>
                     )
                   })}
+                </div>
+
+                {/* Status */}
+                <div
+                  className="
+                  inline-flex items-center gap-2
+                  px-3 py-1.5 rounded-full
+                  bg-white/[0.03] border border-white/[0.06]
+                  w-fit
+                "
+                >
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-xs text-white/20 font-medium">
+                    All systems operational
+                  </span>
                 </div>
               </div>
 
@@ -131,9 +150,19 @@ export default function Footer() {
                             text-sm text-white/20
                             hover:text-white/60
                             transition-colors duration-200
+                            group/link inline-flex items-center gap-1
                           "
                         >
-                          {link.label}
+                          <motion.span
+                            whileHover={{ x: 3 }}
+                            transition={{
+                              type: 'spring',
+                              stiffness: 400,
+                              damping: 17,
+                            }}
+                          >
+                            {link.label}
+                          </motion.span>
                         </Link>
                       </li>
                     ))}
@@ -150,8 +179,7 @@ export default function Footer() {
         <Container>
           <div
             className="
-            py-5
-            flex flex-col sm:flex-row
+            py-5 flex flex-col sm:flex-row
             items-center justify-between gap-4
           "
           >

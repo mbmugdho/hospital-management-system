@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import Container from '@/components/shared/Container'
 import AnimateIn from '@/components/shared/AnimateIn'
 import StaggerContainer from '@/components/shared/StaggerContainer'
@@ -118,25 +119,16 @@ export default function Pricing() {
         >
           {plans.map((plan) => (
             <StaggerItem key={plan.name}>
-              <div
+              <motion.div
+                whileHover={plan.popular ? {} : { y: -4 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                 className={`
-                  relative rounded-2xl border
-                  flex flex-col
-                  transition-all duration-300
+                  relative rounded-2xl border flex flex-col
+                  transition-colors duration-300
                   ${
                     plan.popular
-                      ? `
-                      border-indigo-500/30
-                      bg-white/[0.04]
-                      shadow-2xl shadow-indigo-500/10
-                      ring-1 ring-indigo-500/20
-                    `
-                      : `
-                      border-white/[0.06]
-                      bg-white/[0.02]
-                      hover:bg-white/[0.04]
-                      hover:border-white/[0.1]
-                    `
+                      ? 'border-indigo-500/30 bg-white/[0.04] shadow-2xl shadow-indigo-500/10 ring-1 ring-indigo-500/20 animate-border-glow'
+                      : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.1]'
                   }
                 `}
               >
@@ -187,11 +179,7 @@ export default function Pricing() {
                   <div
                     className={`
                     border-t mb-5
-                    ${
-                      plan.popular
-                        ? 'border-indigo-500/20'
-                        : 'border-white/[0.06]'
-                    }
+                    ${plan.popular ? 'border-indigo-500/20' : 'border-white/[0.06]'}
                   `}
                   />
 
@@ -203,11 +191,9 @@ export default function Pricing() {
                       >
                         <CheckCircle2
                           className={`
-                            w-4 h-4 mt-0.5 flex-shrink-0
-                            ${
-                              plan.popular ? 'text-indigo-400' : 'text-white/20'
-                            }
-                          `}
+                          w-4 h-4 mt-0.5 flex-shrink-0
+                          ${plan.popular ? 'text-indigo-400' : 'text-white/20'}
+                        `}
                         />
                         <span>{feat}</span>
                       </li>
@@ -215,47 +201,34 @@ export default function Pricing() {
                   </ul>
 
                   <Link href={plan.href} className="block">
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.97 }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 400,
+                        damping: 17,
+                      }}
                       className={`
                         w-full inline-flex items-center justify-center
-                        rounded-xl h-11
-                        font-semibold text-sm
-                        transition-all duration-300
+                        rounded-xl h-11 font-semibold text-sm
                         ${
                           plan.popular
-                            ? `
-                            bg-white text-black
-                            hover:bg-white/90
-                            shadow-lg shadow-white/10
-                          `
-                            : `
-                            bg-white/[0.04]
-                            text-white/60
-                            border border-white/[0.08]
-                            hover:bg-white/[0.08]
-                            hover:text-white
-                            hover:border-white/[0.15]
-                          `
+                            ? 'bg-white text-black hover:bg-white/90 shadow-lg shadow-white/10'
+                            : 'bg-white/[0.04] text-white/60 border border-white/[0.08] hover:bg-white/[0.08] hover:text-white hover:border-white/[0.15]'
                         }
                       `}
                     >
                       {plan.cta}
                       <ArrowRight className="w-4 h-4 ml-2" />
-                    </button>
+                    </motion.button>
                   </Link>
                 </div>
 
-                {/* Bottom accent */}
                 {plan.popular && (
-                  <div
-                    className="
-                    h-1
-                    bg-gradient-to-r from-indigo-500 to-purple-500
-                    rounded-b-2xl
-                  "
-                  />
+                  <div className="h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-b-2xl" />
                 )}
-              </div>
+              </motion.div>
             </StaggerItem>
           ))}
         </StaggerContainer>

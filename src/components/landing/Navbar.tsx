@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { HeartPulse, ArrowRight, Menu, X } from 'lucide-react'
 import Container from '@/components/shared/Container'
 import { APP_NAME } from '@/lib/constants'
@@ -30,12 +31,15 @@ export default function Navbar() {
   }, [mobileOpen])
 
   return (
-    <header
+    <motion.header
+      initial={{ y: -80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className={`
         sticky top-0 z-50 w-full
         backdrop-blur-xl
         border-b
-        transition-all duration-300
+        transition-all duration-500
         ${
           scrolled
             ? 'bg-black/70 border-white/[0.06] shadow-lg shadow-black/20'
@@ -47,18 +51,20 @@ export default function Navbar() {
         <div className="h-16 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               className="
-              w-9 h-9 rounded-xl
-              bg-gradient-to-br from-[#6366F1] to-[#4F46E5]
-              flex items-center justify-center
-              shadow-md shadow-indigo-500/20
-              group-hover:shadow-lg group-hover:shadow-indigo-500/30
-              transition-shadow duration-300
-            "
+                w-9 h-9 rounded-xl
+                bg-gradient-to-br from-[#6366F1] to-[#4F46E5]
+                flex items-center justify-center
+                shadow-md shadow-indigo-500/20
+                group-hover:shadow-lg group-hover:shadow-indigo-500/40
+                transition-shadow duration-300
+              "
             >
               <HeartPulse className="w-[18px] h-[18px] text-white" />
-            </div>
+            </motion.div>
             <span className="text-xl font-bold text-white tracking-tight">
               {APP_NAME}
             </span>
@@ -66,24 +72,39 @@ export default function Navbar() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
+            {navLinks.map((link, i) => (
+              <motion.div
                 key={link.label}
-                href={link.href}
-                className="
-                  px-4 py-2 rounded-lg
-                  text-sm font-medium text-white/50
-                  hover:text-white hover:bg-white/[0.06]
-                  transition-all duration-200
-                "
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: 0.1 + i * 0.05,
+                  duration: 0.4,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
               >
-                {link.label}
-              </Link>
+                <Link
+                  href={link.href}
+                  className="
+                    px-4 py-2 rounded-lg
+                    text-sm font-medium text-white/50
+                    hover:text-white hover:bg-white/[0.06]
+                    transition-all duration-200
+                  "
+                >
+                  {link.label}
+                </Link>
+              </motion.div>
             ))}
           </nav>
 
           {/* Desktop CTA */}
-          <div className="hidden md:flex items-center gap-3">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="hidden md:flex items-center gap-3"
+          >
             <Link
               href="/login"
               className="
@@ -96,25 +117,28 @@ export default function Navbar() {
               Sign in
             </Link>
             <Link href="/register">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.96 }}
                 className="
-                inline-flex items-center
-                bg-white text-black
-                hover:bg-white/90
-                rounded-xl px-5 h-9
-                font-semibold text-sm
-                shadow-md shadow-white/10
-                transition-all duration-300
-              "
+                  inline-flex items-center
+                  bg-white text-black
+                  hover:bg-white/90
+                  rounded-xl px-5 h-9
+                  font-semibold text-sm
+                  shadow-md shadow-white/10
+                  transition-colors duration-200
+                "
               >
                 Get Started
                 <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-              </button>
+              </motion.button>
             </Link>
-          </div>
+          </motion.div>
 
           {/* Mobile Toggle */}
-          <button
+          <motion.button
+            whileTap={{ scale: 0.9 }}
             onClick={() => setMobileOpen(!mobileOpen)}
             className="
               md:hidden p-2 rounded-xl
@@ -124,30 +148,36 @@ export default function Navbar() {
             "
             aria-label="Toggle menu"
           >
-            {mobileOpen ? (
-              <X className="w-5 h-5" />
-            ) : (
-              <Menu className="w-5 h-5" />
-            )}
-          </button>
+            <motion.div
+              animate={{ rotate: mobileOpen ? 90 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {mobileOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
+            </motion.div>
+          </motion.button>
         </div>
       </Container>
 
       {/* Mobile Menu */}
-      <div
-        className={`
+      <motion.div
+        initial={false}
+        animate={
+          mobileOpen
+            ? { opacity: 1, y: 0, pointerEvents: 'auto' }
+            : { opacity: 0, y: -8, pointerEvents: 'none' }
+        }
+        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+        className="
           md:hidden
           absolute top-16 left-0 right-0
           bg-black/90 backdrop-blur-xl
           border-b border-white/[0.06]
           shadow-lg shadow-black/30
-          transition-all duration-300 ease-in-out
-          ${
-            mobileOpen
-              ? 'opacity-100 translate-y-0 pointer-events-auto'
-              : 'opacity-0 -translate-y-2 pointer-events-none'
-          }
-        `}
+        "
       >
         <Container className="py-4 flex flex-col gap-1">
           {navLinks.map((link) => (
@@ -182,22 +212,23 @@ export default function Navbar() {
           </Link>
 
           <Link href="/register" onClick={() => setMobileOpen(false)}>
-            <button
+            <motion.button
+              whileTap={{ scale: 0.97 }}
               className="
-              w-full mt-1
-              inline-flex items-center justify-center
-              bg-white text-black
-              hover:bg-white/90
-              rounded-xl h-11
-              font-semibold text-sm
-            "
+                w-full mt-1
+                inline-flex items-center justify-center
+                bg-white text-black
+                hover:bg-white/90
+                rounded-xl h-11
+                font-semibold text-sm
+              "
             >
               Get Started
               <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-            </button>
+            </motion.button>
           </Link>
         </Container>
-      </div>
-    </header>
+      </motion.div>
+    </motion.header>
   )
 }

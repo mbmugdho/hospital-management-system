@@ -17,14 +17,16 @@ export default function StaggerItem({
       variants={{
         hidden: {
           opacity: 0,
-          y: 25,
+          y: 20,
+          filter: 'blur(6px)',
         },
         visible: {
           opacity: 1,
           y: 0,
+          filter: 'blur(0px)',
           transition: {
             duration: 0.5,
-            ease: [0.21, 0.47, 0.32, 0.98],
+            ease: [0.16, 1, 0.3, 1],
           },
         },
       }}

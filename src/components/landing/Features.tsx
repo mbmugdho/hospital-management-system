@@ -1,5 +1,6 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import Container from '@/components/shared/Container'
 import AnimateIn from '@/components/shared/AnimateIn'
 import StaggerContainer from '@/components/shared/StaggerContainer'
@@ -19,6 +20,8 @@ const features = [
     icon: Users,
     color: 'text-blue-400',
     iconBg: 'bg-blue-500/10 border-blue-500/10',
+    iconGlow:
+      'group-hover:bg-blue-500/20 group-hover:border-blue-500/20 group-hover:shadow-blue-500/10',
     title: 'Patient Management',
     description:
       'Complete patient records, medical history, lab reports and real-time status tracking from one dashboard.',
@@ -27,6 +30,8 @@ const features = [
     icon: CalendarDays,
     color: 'text-emerald-400',
     iconBg: 'bg-emerald-500/10 border-emerald-500/10',
+    iconGlow:
+      'group-hover:bg-emerald-500/20 group-hover:border-emerald-500/20 group-hover:shadow-emerald-500/10',
     title: 'Smart Appointments',
     description:
       'Schedule and track appointments with an intuitive calendar. Reduce no-shows with organized scheduling.',
@@ -35,6 +40,8 @@ const features = [
     icon: Receipt,
     color: 'text-violet-400',
     iconBg: 'bg-violet-500/10 border-violet-500/10',
+    iconGlow:
+      'group-hover:bg-violet-500/20 group-hover:border-violet-500/20 group-hover:shadow-violet-500/10',
     title: 'Billing & Invoices',
     description:
       'Generate invoices instantly, track payments, and manage finances with automated calculations.',
@@ -43,6 +50,8 @@ const features = [
     icon: Pill,
     color: 'text-orange-400',
     iconBg: 'bg-orange-500/10 border-orange-500/10',
+    iconGlow:
+      'group-hover:bg-orange-500/20 group-hover:border-orange-500/20 group-hover:shadow-orange-500/10',
     title: 'Pharmacy & Inventory',
     description:
       'Monitor stock levels, get low-stock alerts, track expiry dates and manage your pharmacy.',
@@ -51,6 +60,8 @@ const features = [
     icon: BarChart3,
     color: 'text-cyan-400',
     iconBg: 'bg-cyan-500/10 border-cyan-500/10',
+    iconGlow:
+      'group-hover:bg-cyan-500/20 group-hover:border-cyan-500/20 group-hover:shadow-cyan-500/10',
     title: 'Analytics & Reports',
     description:
       'Real-time insights into hospital performance with visual charts and patient statistics.',
@@ -59,6 +70,8 @@ const features = [
     icon: Shield,
     color: 'text-rose-400',
     iconBg: 'bg-rose-500/10 border-rose-500/10',
+    iconGlow:
+      'group-hover:bg-rose-500/20 group-hover:border-rose-500/20 group-hover:shadow-rose-500/10',
     title: 'Secure & Compliant',
     description:
       'Enterprise-grade security with role-based access, encryption, and audit logs.',
@@ -124,37 +137,39 @@ export default function Features() {
             const Icon = feature.icon
             return (
               <StaggerItem key={feature.title}>
-                <div
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                   className="
-                  group h-full
-                  bg-white/[0.02]
-                  border border-white/[0.06]
-                  rounded-2xl
-                  p-6
-                  hover:bg-white/[0.04]
-                  hover:border-white/[0.1]
-                  transition-all duration-300
-                  cursor-default
-                  flex flex-col
-                "
+                    group h-full
+                    bg-white/[0.02] border border-white/[0.06]
+                    rounded-2xl p-6
+                    hover:bg-white/[0.04]
+                    hover:border-white/[0.1]
+                    hover:shadow-lg hover:shadow-black/30
+                    transition-colors duration-300
+                    cursor-default flex flex-col
+                  "
                 >
+                  {/* Icon */}
                   <div
                     className={`
                     w-10 h-10 rounded-xl
                     ${feature.iconBg}
+                    ${feature.iconGlow}
                     border
                     flex items-center justify-center
                     mb-4
+                    transition-all duration-300
+                    shadow-lg
                   `}
                   >
-                    <Icon className={`w-4.5 h-4.5 ${feature.color}`} />
+                    <Icon className={`w-4 h-4 ${feature.color}`} />
                   </div>
 
                   <h3
                     className="
-                    text-sm font-semibold
-                    text-white/80
-                    mb-2
+                    text-sm font-semibold text-white/80 mb-2
                   "
                   >
                     {feature.title}
@@ -163,8 +178,7 @@ export default function Features() {
                   <p
                     className="
                     text-sm text-white/25
-                    leading-relaxed
-                    flex-1
+                    leading-relaxed flex-1
                   "
                   >
                     {feature.description}
@@ -173,8 +187,7 @@ export default function Features() {
                   <div
                     className="
                     flex items-center gap-1.5
-                    text-xs font-medium
-                    text-indigo-400
+                    text-xs font-medium text-indigo-400
                     mt-4
                     opacity-0 translate-y-1
                     group-hover:opacity-100
@@ -185,7 +198,7 @@ export default function Features() {
                     Learn more
                     <ArrowRight className="w-3 h-3" />
                   </div>
-                </div>
+                </motion.div>
               </StaggerItem>
             )
           })}
