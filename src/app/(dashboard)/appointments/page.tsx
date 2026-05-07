@@ -51,6 +51,7 @@ export default function AppointmentsPage() {
         />
 
         {/* Table */}
+
         <AppointmentTable
           search={search}
           filter={filter}
