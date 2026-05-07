@@ -54,6 +54,7 @@ export default function PharmacyPage() {
         />
 
         {/* Table */}
+
         <PharmacyTable
           search={search}
           stockFilter={stockFilter}
