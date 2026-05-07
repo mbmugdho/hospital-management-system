@@ -45,6 +45,7 @@ export default function BillingPage() {
         <BillingFilters active={filter} onChange={setFilter} />
 
         {/* Table */}
+
         <BillingTable search={search} filter={filter} />
       </div>
     </div>
