@@ -33,7 +33,7 @@ const statusDot: Record<string, string> = {
   partial: 'bg-violet-500',
 }
 
-// ── Helpers ───────────────────────────────────────────────────────
+// ── Shared Helpers ────────────────────────────────────────────────
 function getInitials(name: string): string {
   return name
     .trim()
@@ -80,7 +80,7 @@ interface BillingTableProps {
   filter: BillingFilterStatus
 }
 
-// ── Component ─────────────────────────────────────────────────────
+// ── Main Table Component ──────────────────────────────────────────
 export default function BillingTable({ search, filter }: BillingTableProps) {
   const [sortField, setSortField] = useState<SortField>('date')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
@@ -230,19 +230,10 @@ export default function BillingTable({ search, filter }: BillingTableProps) {
                 const isExpanded = expandedId === inv.id
 
                 return (
-                  <motion.tr
+                  <tr
                     key={inv.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 300,
-                      damping: 28,
-                      delay: i * 0.04,
-                    }}
-                    onHoverStart={() => setHoveredId(inv.id)}
-                    onHoverEnd={() => setHoveredId(null)}
+                    onMouseEnter={() => setHoveredId(inv.id)}
+                    onMouseLeave={() => setHoveredId(null)}
                     className="border-b border-white/[0.04] last:border-0
                       cursor-pointer transition-colors duration-150"
                     style={{
@@ -386,7 +377,7 @@ export default function BillingTable({ search, filter }: BillingTableProps) {
                         </motion.button>
                       </div>
                     </td>
-                  </motion.tr>
+                  </tr>
                 )
               })}
             </AnimatePresence>
@@ -528,8 +519,4 @@ function ExpandedRow({
       </div>
     </motion.div>
   )
-}
-
-function formatCurrency(amount: number): string {
-  return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
 }
