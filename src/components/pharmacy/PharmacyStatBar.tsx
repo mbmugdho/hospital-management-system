@@ -85,7 +85,7 @@ export default function PharmacyStatBar() {
               <Icon className={`w-4 h-4 ${stat.color}`} />
             </div>
             <div>
-              <p className={`text-xl font-bold ${stat.color}`}>{stat.value}</p>
+              <p className={`text-sm md:text-xl font-bold ${stat.color}`}>{stat.value}</p>
               <p className="text-white/40 text-xs mt-0.5">{stat.label}</p>
               <p className="text-white/20 text-xs">{stat.sub}</p>
             </div>
