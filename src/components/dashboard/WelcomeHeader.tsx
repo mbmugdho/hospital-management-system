@@ -55,7 +55,7 @@ export default function WelcomeHeader({
 
         <h1 className="text-white text-2xl sm:text-3xl font-bold tracking-tight">
           {displayName}{' '}
-          <span className="text-white/30 font-normal text-xl">👋</span>
+          <span className="text-white/30 font-normal text-xl"></span>
         </h1>
 
         <p className="text-white/40 text-sm mt-1">
