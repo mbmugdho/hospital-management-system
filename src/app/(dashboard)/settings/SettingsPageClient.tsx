@@ -66,6 +66,7 @@ export default function SettingsPageClient({
                 hospitalName={hospitalName}
               />
             )}
+
             {activeTab === 'security' && <SecuritySettings />}
             {activeTab === 'notifications' && <NotificationSettings />}
             {activeTab === 'appearance' && <AppearanceSettings />}
