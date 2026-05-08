@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   ChevronUp,
   ChevronDown,
@@ -16,11 +16,9 @@ import type { WithMeta } from '@/lib/utils/mergeData'
 import type { Patient } from '@/types'
 import type { FilterStatus } from './PatientFilters'
 
-// Sort types
 type SortField = 'name' | 'age' | 'registeredAt' | 'status'
 type SortDir = 'asc' | 'desc'
 
-// Status badge styles
 const statusStyle: Record<string, string> = {
   active: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
   admitted: 'bg-amber-500/10  text-amber-400  border border-amber-500/20',
@@ -51,7 +49,6 @@ function formatDate(dateStr: string): string {
   })
 }
 
-// Sort icon component
 function SortIcon({
   field,
   sortField,
@@ -88,7 +85,6 @@ export default function PatientTable({
   const [sortField, setSortField] = useState<SortField>('registeredAt')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
 
-  // Filter by status and search query
   const filtered = patients.filter((p) => {
     const matchFilter =
       filter === 'All' || p.status.toLowerCase() === filter.toLowerCase()
@@ -101,7 +97,6 @@ export default function PatientTable({
     return matchFilter && matchSearch
   })
 
-  // Sort filtered results
   const sorted = [...filtered].sort((a, b) => {
     let valA: string | number = a[sortField] ?? ''
     let valB: string | number = b[sortField] ?? ''
@@ -118,15 +113,13 @@ export default function PatientTable({
   })
 
   function toggleSort(field: SortField) {
-    if (sortField === field) {
-      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
-    } else {
+    if (sortField === field) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    else {
       setSortField(field)
       setSortDir('asc')
     }
   }
 
-  // Sortable column header
   function ColHeader({
     field,
     label,
@@ -150,7 +143,6 @@ export default function PatientTable({
     )
   }
 
-  // Empty state
   if (sorted.length === 0) {
     return (
       <motion.div
@@ -176,40 +168,60 @@ export default function PatientTable({
     >
       <div className="overflow-x-auto">
         <table className="w-full">
-          {/* Head */}
           <thead>
             <tr className="border-b border-white/[0.06]">
+              {/* Patient — always visible */}
               <ColHeader field="name" label="Patient" className="pl-5" />
-              <ColHeader field="age" label="Age" />
-              <th className="px-4 py-3 text-left text-white/40 text-xs font-medium">
+
+              {/* Age — hidden on mobile, show sm+ */}
+              <ColHeader
+                field="age"
+                label="Age"
+                className="hidden sm:table-cell"
+              />
+
+              {/* Blood — hidden on mobile, show sm+ */}
+              <th
+                className="px-4 py-3 text-left text-white/40 text-xs
+                font-medium hidden sm:table-cell"
+              >
                 Blood
               </th>
-              <th className="px-4 py-3 text-left text-white/40 text-xs font-medium">
+
+              {/* Contact — hidden on mobile, show md+ */}
+              <th
+                className="px-4 py-3 text-left text-white/40 text-xs
+                font-medium hidden md:table-cell"
+              >
                 Contact
               </th>
-              <th className="px-4 py-3 text-left text-white/40 text-xs font-medium hidden lg:table-cell">
+
+              {/* Doctor — hidden until lg */}
+              <th
+                className="px-4 py-3 text-left text-white/40 text-xs
+                font-medium hidden lg:table-cell"
+              >
                 Doctor
               </th>
+
+              {/* Registered — hidden until md */}
               <ColHeader
                 field="registeredAt"
                 label="Registered"
                 className="hidden md:table-cell"
               />
+
+              {/* Status — always visible */}
               <ColHeader field="status" label="Status" />
+
+              {/* Actions — always visible */}
               <th className="px-4 py-3 text-white/40 text-xs font-medium text-right pr-5">
                 Actions
               </th>
             </tr>
           </thead>
 
-          {/* Body */}
           <tbody>
-            {/*
-              KEY FIX: We do NOT use AnimatePresence with entry animations here.
-              Instead we use layout animation only.
-              This prevents the "full reload flash" when filters change.
-              Rows smoothly reorder without re-playing entry animations.
-            */}
             {sorted.map((patient) => {
               const key = patient.status.toLowerCase()
               const badge = statusStyle[key] ?? statusStyle.active
@@ -223,7 +235,7 @@ export default function PatientTable({
                   className="border-b border-white/[0.04] last:border-0
                     hover:bg-white/[0.025] transition-colors duration-150 cursor-pointer"
                 >
-                  {/* Patient name + ID + Sample badge */}
+                  {/* Patient — name + ID + age/gender on mobile + sample badge */}
                   <td className="px-4 py-3.5 pl-5">
                     <div className="flex items-center gap-3">
                       <div
@@ -235,26 +247,33 @@ export default function PatientTable({
                           {getInitials(patient.name)}
                         </span>
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="text-white/90 text-sm font-medium">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-white/90 text-sm font-medium truncate">
                             {patient.name}
                           </p>
                           {patient._isDummy && <SampleBadge />}
                         </div>
                         <p className="text-white/30 text-xs">{patient.id}</p>
+                        {/* Age + gender shown inline on mobile only */}
+                        <p className="text-white/30 text-xs sm:hidden">
+                          {patient.age} · {patient.gender} ·{' '}
+                          <span className="text-red-400/70">
+                            {patient.bloodGroup}
+                          </span>
+                        </p>
                       </div>
                     </div>
                   </td>
 
-                  {/* Age + Gender */}
-                  <td className="px-4 py-3.5">
+                  {/* Age + Gender — hidden on mobile */}
+                  <td className="px-4 py-3.5 hidden sm:table-cell">
                     <p className="text-white/70 text-sm">{patient.age}</p>
                     <p className="text-white/30 text-xs">{patient.gender}</p>
                   </td>
 
-                  {/* Blood group */}
-                  <td className="px-4 py-3.5">
+                  {/* Blood group — hidden on mobile */}
+                  <td className="px-4 py-3.5 hidden sm:table-cell">
                     <span
                       className="text-xs font-semibold px-2 py-1
                       bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg"
@@ -263,8 +282,8 @@ export default function PatientTable({
                     </span>
                   </td>
 
-                  {/* Contact */}
-                  <td className="px-4 py-3.5">
+                  {/* Contact — hidden on mobile, show md+ */}
+                  <td className="px-4 py-3.5 hidden md:table-cell">
                     <div className="flex flex-col gap-1">
                       <a
                         href={`tel:${patient.phone}`}
@@ -272,8 +291,10 @@ export default function PatientTable({
                         className="flex items-center gap-1.5 text-white/50
                           text-xs hover:text-indigo-400 transition-colors"
                       >
-                        <Phone className="w-3 h-3" />
-                        {patient.phone}
+                        <Phone className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate max-w-[130px]">
+                          {patient.phone}
+                        </span>
                       </a>
                       <a
                         href={`mailto:${patient.email}`}
@@ -281,40 +302,42 @@ export default function PatientTable({
                         className="flex items-center gap-1.5 text-white/50
                           text-xs hover:text-indigo-400 transition-colors"
                       >
-                        <Mail className="w-3 h-3" />
-                        <span className="truncate max-w-[140px]">
+                        <Mail className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate max-w-[130px]">
                           {patient.email}
                         </span>
                       </a>
                     </div>
                   </td>
 
-                  {/* Doctor */}
+                  {/* Doctor — hidden until lg */}
                   <td className="px-4 py-3.5 hidden lg:table-cell">
-                    <p className="text-white/60 text-xs">
+                    <p className="text-white/60 text-xs truncate max-w-[140px]">
                       {patient.assignedDoctor}
                     </p>
                   </td>
 
-                  {/* Registered */}
+                  {/* Registered — hidden until md */}
                   <td className="px-4 py-3.5 hidden md:table-cell">
                     <p className="text-white/50 text-xs">
                       {formatDate(patient.registeredAt)}
                     </p>
                   </td>
 
-                  {/* Status */}
+                  {/* Status — always visible */}
                   <td className="px-4 py-3.5">
                     <span
-                      className={`flex items-center gap-1.5 text-xs
-                      font-medium px-2.5 py-1 rounded-full w-fit ${badge}`}
+                      className={`inline-flex items-center gap-1.5 text-xs
+                      font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${badge}`}
                     >
-                      <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dot}`}
+                      />
                       {patient.status}
                     </span>
                   </td>
 
-                  {/* Actions */}
+                  {/* Actions — always visible */}
                   <td className="px-4 py-3.5 pr-5">
                     <div className="flex items-center justify-end gap-1">
                       <motion.button
@@ -354,8 +377,11 @@ export default function PatientTable({
         </table>
       </div>
 
-      {/* Footer */}
-      <div className="px-5 py-3 border-t border-white/[0.06] flex items-center justify-between">
+      {/* Footer — stacks on mobile */}
+      <div
+        className="px-5 py-3 border-t border-white/[0.06]
+        flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1"
+      >
         <p className="text-white/30 text-xs">
           Showing{' '}
           <span className="text-white/60 font-medium">{sorted.length}</span> of{' '}

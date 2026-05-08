@@ -52,13 +52,15 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         onMobileClose={() => setMobileOpen(false)}
       />
 
-      {/* Right column */}
-      <div className="flex-1 flex flex-col min-h-0">
-        {/* Navbar — always visible, never scrolls */}
+      {/* Right column — min-w-0 prevents flex overflow cutting the right side */}
+      <div className="flex-1 flex flex-col min-h-0 min-w-0">
+        {/* Navbar */}
         <DashboardNavbar user={user} onMenuClick={() => setMobileOpen(true)} />
 
-        {/* Scrollable page content */}
-        <main className="flex-1 overflow-y-auto min-h-0">{children}</main>
+        {/* Scrollable content — min-w-0 keeps it inside the column */}
+        <main className="flex-1 overflow-y-auto min-h-0 min-w-0">
+          {children}
+        </main>
       </div>
     </div>
   )
