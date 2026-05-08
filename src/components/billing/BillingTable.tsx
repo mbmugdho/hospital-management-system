@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ChevronUp,
@@ -93,6 +93,7 @@ export default function BillingTable({
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
+  // Filter by status and search query
   const filtered = invoices.filter((inv) => {
     const matchFilter =
       filter === 'All' || inv.status.toLowerCase() === filter.toLowerCase()
@@ -104,6 +105,7 @@ export default function BillingTable({
     return matchFilter && matchSearch
   })
 
+  // Sort filtered results
   const sorted = [...filtered].sort((a, b) => {
     let valA: string | number
     let valB: string | number
@@ -160,7 +162,8 @@ export default function BillingTable({
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-16 text-center"
+        className="bg-white/[0.02] border border-white/[0.06] rounded-2xl
+          p-16 text-center"
       >
         <p className="text-white/30 text-sm">No invoices found</p>
         <p className="text-white/20 text-xs mt-1">
@@ -180,6 +183,7 @@ export default function BillingTable({
     >
       <div className="overflow-x-auto">
         <table className="w-full">
+          {/* Head */}
           <thead>
             <tr className="border-b border-white/[0.06]">
               <th className="w-10 px-2 py-3" />
@@ -203,11 +207,8 @@ export default function BillingTable({
             </tr>
           </thead>
 
+          {/* Body */}
           <tbody>
-            {/*
-              Layout animation only — no entry animation on filter change.
-              Expandable rows rendered inline below each data row.
-            */}
             {sorted.map((inv) => {
               const sKey = inv.status.toLowerCase()
               const badge = statusStyle[sKey] ?? statusStyle.unpaid
@@ -215,27 +216,34 @@ export default function BillingTable({
               const isExpanded = expandedId === inv._localId
 
               return (
-                <>
+                /*
+                  React.Fragment with key is required here because we render
+                  two sibling <tr> elements per invoice row inside a .map().
+                  Bare <> fragments do not support the key prop.
+                */
+                <React.Fragment key={inv._localId}>
+                  {/* Main invoice row */}
                   <motion.tr
-                    key={inv._localId}
                     layout
                     transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                     className="border-b border-white/[0.04] last:border-0
-                      hover:bg-white/[0.025] transition-colors duration-150 cursor-pointer"
+                      hover:bg-white/[0.025] transition-colors duration-150
+                      cursor-pointer"
                   >
-                    {/* Expand toggle */}
+                    {/* Expand chevron */}
                     <td className="px-2 py-3.5">
                       <motion.button
                         onClick={() => toggleExpand(inv._localId)}
                         animate={{ rotate: isExpanded ? 90 : 0 }}
                         transition={{ duration: 0.15 }}
-                        className="p-1 rounded text-white/20 hover:text-white/50 transition-colors"
+                        className="p-1 rounded text-white/20
+                          hover:text-white/50 transition-colors"
                       >
                         <ChevronRight className="w-3.5 h-3.5" />
                       </motion.button>
                     </td>
 
-                    {/* Invoice ID */}
+                    {/* Invoice ID + SAMPLE badge */}
                     <td className="px-4 py-3.5 pl-1">
                       <div className="flex items-center gap-2">
                         <div className="p-1.5 bg-indigo-500/10 rounded-lg flex-shrink-0">
@@ -255,13 +263,13 @@ export default function BillingTable({
                       </div>
                     </td>
 
-                    {/* Patient */}
+                    {/* Patient avatar + name */}
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-2.5">
                         <div
                           className="w-8 h-8 rounded-full flex-shrink-0
-                          bg-gradient-to-br from-indigo-500/20 to-violet-500/20
-                          border border-white/[0.08] flex items-center justify-center"
+                            bg-gradient-to-br from-indigo-500/20 to-violet-500/20
+                            border border-white/[0.08] flex items-center justify-center"
                         >
                           <span className="text-white/70 text-xs font-semibold">
                             {getInitials(inv.patient)}
@@ -280,7 +288,10 @@ export default function BillingTable({
 
                     {/* Items count */}
                     <td className="px-4 py-3.5 hidden md:table-cell">
-                      <span className="text-white/40 text-xs bg-white/[0.04] px-2 py-0.5 rounded-md">
+                      <span
+                        className="text-white/40 text-xs bg-white/[0.04]
+                        px-2 py-0.5 rounded-md"
+                      >
                         {inv.items.length} item
                         {inv.items.length !== 1 ? 's' : ''}
                       </span>
@@ -305,18 +316,18 @@ export default function BillingTable({
                       </p>
                     </td>
 
-                    {/* Status */}
+                    {/* Status badge */}
                     <td className="px-4 py-3.5">
                       <span
                         className={`flex items-center gap-1.5 text-xs
-                        font-medium px-2.5 py-1 rounded-full w-fit ${badge}`}
+                          font-medium px-2.5 py-1 rounded-full w-fit ${badge}`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
                         {inv.status}
                       </span>
                     </td>
 
-                    {/* Actions */}
+                    {/* Action buttons */}
                     <td className="px-4 py-3.5 pr-5">
                       <div className="flex items-center justify-end gap-1">
                         <motion.button
@@ -365,10 +376,10 @@ export default function BillingTable({
                     </td>
                   </motion.tr>
 
-                  {/* Inline expanded detail row */}
+                  {/* Expandable detail row — inline below the invoice row */}
                   <AnimatePresence>
                     {isExpanded && (
-                      <tr key={`${inv._localId}-expanded`}>
+                      <tr key={`${inv._localId}-detail`}>
                         <td colSpan={10} className="p-0">
                           <motion.div
                             initial={{ height: 0, opacity: 0 }}
@@ -386,7 +397,7 @@ export default function BillingTable({
                                 Line Items — {inv.id}
                               </p>
 
-                              {/* Item header */}
+                              {/* Column headers for items */}
                               <div className="grid grid-cols-[1fr_60px_80px_80px] gap-4 px-3 mb-1">
                                 {['Description', 'Qty', 'Price', 'Total'].map(
                                   (h) => (
@@ -400,13 +411,13 @@ export default function BillingTable({
                                 )}
                               </div>
 
-                              {/* Item rows */}
+                              {/* Line item rows */}
                               <div className="space-y-1">
                                 {inv.items.map((item, idx) => (
                                   <div
                                     key={idx}
-                                    className="grid grid-cols-[1fr_60px_80px_80px] gap-4 px-3
-                                      py-2 rounded-lg bg-white/[0.02]"
+                                    className="grid grid-cols-[1fr_60px_80px_80px] gap-4
+                                      px-3 py-2 rounded-lg bg-white/[0.02]"
                                   >
                                     <span className="text-white/70 text-xs">
                                       {item.description}
@@ -425,7 +436,10 @@ export default function BillingTable({
                               </div>
 
                               {/* Totals summary */}
-                              <div className="border-t border-white/[0.06] mt-3 pt-2 space-y-1 max-w-xs ml-auto">
+                              <div
+                                className="border-t border-white/[0.06] mt-3 pt-2
+                                  space-y-1 max-w-xs ml-auto"
+                              >
                                 <div className="flex items-center justify-between px-3">
                                   <span className="text-white/40 text-xs">
                                     Subtotal
@@ -442,7 +456,10 @@ export default function BillingTable({
                                     {fmt(inv.tax)}
                                   </span>
                                 </div>
-                                <div className="flex items-center justify-between px-3 pt-1 border-t border-white/[0.06]">
+                                <div
+                                  className="flex items-center justify-between px-3
+                                    pt-1 border-t border-white/[0.06]"
+                                >
                                   <span className="text-white/60 text-xs font-semibold">
                                     Total
                                   </span>
@@ -452,7 +469,7 @@ export default function BillingTable({
                                 </div>
                               </div>
 
-                              {/* Notes */}
+                              {/* Optional notes */}
                               {inv.notes && (
                                 <p className="mt-3 px-3 text-white/25 text-xs">
                                   Note:{' '}
@@ -467,7 +484,7 @@ export default function BillingTable({
                       </tr>
                     )}
                   </AnimatePresence>
-                </>
+                </React.Fragment>
               )
             })}
           </tbody>
@@ -475,7 +492,10 @@ export default function BillingTable({
       </div>
 
       {/* Footer */}
-      <div className="px-5 py-3 border-t border-white/[0.06] flex items-center justify-between">
+      <div
+        className="px-5 py-3 border-t border-white/[0.06]
+          flex items-center justify-between"
+      >
         <p className="text-white/30 text-xs">
           Showing{' '}
           <span className="text-white/60 font-medium">{sorted.length}</span> of{' '}
