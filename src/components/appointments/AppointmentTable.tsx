@@ -1,25 +1,24 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   ChevronUp,
   ChevronDown,
   ChevronsUpDown,
-  Eye,
-  MoreHorizontal,
+  Pencil,
+  Trash2,
   User,
   Stethoscope,
 } from 'lucide-react'
-import { appointments } from '@/data/appointments'
+import SampleBadge from '@/components/shared/SampleBadge'
+import type { WithMeta } from '@/lib/utils/mergeData'
 import type { Appointment } from '@/types'
 import type { AppointmentFilterStatus } from './AppointmentFilters'
 
-// ── Types ─────────────────────────────────────────────────────────
 type SortField = 'patient' | 'doctor' | 'date' | 'type' | 'status'
 type SortDir = 'asc' | 'desc'
 
-// ── Status styles ─────────────────────────────────────────────────
 const statusStyle: Record<string, string> = {
   confirmed: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
   pending: 'bg-amber-500/10  text-amber-400  border border-amber-500/20',
@@ -35,13 +34,15 @@ const statusDot: Record<string, string> = {
 }
 
 const typeStyle: Record<string, string> = {
-  'check-up': 'bg-sky-500/10     text-sky-400',
-  'follow-up': 'bg-violet-500/10  text-violet-400',
-  consultation: 'bg-indigo-500/10  text-indigo-400',
-  emergency: 'bg-red-500/10     text-red-400',
+  'check-up': 'bg-sky-500/10    text-sky-400',
+  'follow-up': 'bg-violet-500/10 text-violet-400',
+  consultation: 'bg-indigo-500/10 text-indigo-400',
+  emergency: 'bg-red-500/10    text-red-400',
+  surgery: 'bg-rose-500/10   text-rose-400',
+  'lab test': 'bg-cyan-500/10   text-cyan-400',
+  vaccination: 'bg-teal-500/10   text-teal-400',
 }
 
-// ── Helpers ───────────────────────────────────────────────────────
 function getInitials(name: string): string {
   return name
     .trim()
@@ -60,7 +61,6 @@ function formatDate(dateStr: string): string {
   })
 }
 
-// ── Sort icon ─────────────────────────────────────────────────────
 function SortIcon({
   field,
   sortField,
@@ -79,41 +79,41 @@ function SortIcon({
   )
 }
 
-// ── Props ─────────────────────────────────────────────────────────
 interface AppointmentTableProps {
+  appointments: WithMeta<Appointment>[]
   search: string
   filter: AppointmentFilterStatus
   dateFilter: string
+  onEdit: (appt: WithMeta<Appointment>) => void
+  onDelete: (appt: WithMeta<Appointment>) => void
 }
 
-// ── Component ─────────────────────────────────────────────────────
 export default function AppointmentTable({
+  appointments,
   search,
   filter,
   dateFilter,
+  onEdit,
+  onDelete,
 }: AppointmentTableProps) {
   const [sortField, setSortField] = useState<SortField>('date')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
-  const [hoveredId, setHoveredId] = useState<string | null>(null)
 
-  // ── Filter ──────────────────────────────────────────────────────
-  const filtered: Appointment[] = appointments.filter((a) => {
+  // Apply status, date, and search filters
+  const filtered = appointments.filter((a) => {
     const matchStatus =
       filter === 'All' || a.status.toLowerCase() === filter.toLowerCase()
-
     const matchDate = !dateFilter || a.date === dateFilter
-
     const q = search.toLowerCase()
     const matchSearch =
       a.patient.toLowerCase().includes(q) ||
       a.doctor.toLowerCase().includes(q) ||
       a.type.toLowerCase().includes(q) ||
       a.id.toLowerCase().includes(q)
-
     return matchStatus && matchDate && matchSearch
   })
 
-  // ── Sort ────────────────────────────────────────────────────────
+  // Sort results
   const sorted = [...filtered].sort((a, b) => {
     const valA = String(a[sortField] ?? '').toLowerCase()
     const valB = String(b[sortField] ?? '').toLowerCase()
@@ -122,7 +122,6 @@ export default function AppointmentTable({
     return 0
   })
 
-  // ── Toggle sort ─────────────────────────────────────────────────
   function toggleSort(field: SortField) {
     if (sortField === field) {
       setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
@@ -132,7 +131,6 @@ export default function AppointmentTable({
     }
   }
 
-  // ── Column header ────────────────────────────────────────────────
   function ColHeader({
     field,
     label,
@@ -156,14 +154,12 @@ export default function AppointmentTable({
     )
   }
 
-  // ── Empty state ──────────────────────────────────────────────────
   if (sorted.length === 0) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="bg-white/[0.02] border border-white/[0.06] rounded-2xl
-          p-16 text-center"
+        className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-16 text-center"
       >
         <p className="text-white/30 text-sm">No appointments found</p>
         <p className="text-white/20 text-xs mt-1">
@@ -183,7 +179,6 @@ export default function AppointmentTable({
     >
       <div className="overflow-x-auto">
         <table className="w-full">
-          {/* ── Head ── */}
           <thead>
             <tr className="border-b border-white/[0.06]">
               <ColHeader field="patient" label="Patient" className="pl-5" />
@@ -194,155 +189,144 @@ export default function AppointmentTable({
                 Time
               </th>
               <ColHeader field="status" label="Status" />
-              <th
-                className="px-4 py-3 text-right text-white/40
-                text-xs font-medium pr-5"
-              >
+              <th className="px-4 py-3 text-right text-white/40 text-xs font-medium pr-5">
                 Actions
               </th>
             </tr>
           </thead>
 
-          {/* ── Body ── */}
           <tbody>
-            <AnimatePresence mode="popLayout">
-              {sorted.map((appt, i) => {
-                const statusKey = appt.status.toLowerCase()
-                const typeKey = appt.type.toLowerCase()
-                const badge = statusStyle[statusKey] ?? statusStyle.pending
-                const dot = statusDot[statusKey] ?? statusDot.pending
-                const typeBadge =
-                  typeStyle[typeKey] ?? 'bg-white/[0.04] text-white/40'
-                const isHovered = hoveredId === appt.id
+            {/*
+              Layout animation only — no entry/exit animations on filter change.
+              This is the same fix applied to the patients table.
+            */}
+            {sorted.map((appt) => {
+              const statusKey = appt.status.toLowerCase()
+              const typeKey = appt.type.toLowerCase()
+              const badge = statusStyle[statusKey] ?? statusStyle.pending
+              const dot = statusDot[statusKey] ?? statusDot.pending
+              const typeBadge =
+                typeStyle[typeKey] ?? 'bg-white/[0.04] text-white/40'
 
-                return (
-                  <motion.tr
-                    key={appt.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 300,
-                      damping: 28,
-                      delay: i * 0.04,
-                    }}
-                    onHoverStart={() => setHoveredId(appt.id)}
-                    onHoverEnd={() => setHoveredId(null)}
-                    className="border-b border-white/[0.04] last:border-0
-                      transition-colors duration-150 cursor-pointer"
-                    style={{
-                      backgroundColor: isHovered
-                        ? 'rgba(255,255,255,0.025)'
-                        : 'transparent',
-                    }}
-                  >
-                    {/* Patient */}
-                    <td className="px-4 py-3.5 pl-5">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-8 h-8 rounded-full flex-shrink-0
-                          bg-gradient-to-br from-indigo-500/20 to-violet-500/20
-                          border border-white/[0.08]
-                          flex items-center justify-center"
-                        >
-                          <span className="text-white/70 text-xs font-semibold">
-                            {getInitials(appt.patient)}
-                          </span>
-                        </div>
-                        <div>
+              return (
+                <motion.tr
+                  key={appt._localId}
+                  layout
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  className="border-b border-white/[0.04] last:border-0
+                    hover:bg-white/[0.025] transition-colors duration-150 cursor-pointer"
+                >
+                  {/* Patient */}
+                  <td className="px-4 py-3.5 pl-5">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-8 h-8 rounded-full flex-shrink-0
+                        bg-gradient-to-br from-indigo-500/20 to-violet-500/20
+                        border border-white/[0.08] flex items-center justify-center"
+                      >
+                        <span className="text-white/70 text-xs font-semibold">
+                          {getInitials(appt.patient)}
+                        </span>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
                           <p className="text-white/90 text-sm font-medium">
                             {appt.patient}
                           </p>
-                          <p className="text-white/30 text-xs flex items-center gap-1">
-                            <User className="w-2.5 h-2.5" />
-                            {appt.patientId}
-                          </p>
+                          {appt._isDummy && <SampleBadge />}
                         </div>
+                        <p className="text-white/30 text-xs flex items-center gap-1">
+                          <User className="w-2.5 h-2.5" />
+                          {appt.patientId}
+                        </p>
                       </div>
-                    </td>
+                    </div>
+                  </td>
 
-                    {/* Doctor */}
-                    <td className="px-4 py-3.5">
-                      <p className="text-white/70 text-sm">{appt.doctor}</p>
-                      <p className="text-white/30 text-xs flex items-center gap-1">
-                        <Stethoscope className="w-2.5 h-2.5" />
-                        {appt.doctorId}
-                      </p>
-                    </td>
+                  {/* Doctor */}
+                  <td className="px-4 py-3.5">
+                    <p className="text-white/70 text-sm">{appt.doctor}</p>
+                    <p className="text-white/30 text-xs flex items-center gap-1">
+                      <Stethoscope className="w-2.5 h-2.5" />
+                      {appt.doctorId}
+                    </p>
+                  </td>
 
-                    {/* Type */}
-                    <td className="px-4 py-3.5">
-                      <span
-                        className={`text-xs font-medium px-2.5 py-1
-                        rounded-lg capitalize ${typeBadge}`}
+                  {/* Type */}
+                  <td className="px-4 py-3.5">
+                    <span
+                      className={`text-xs font-medium px-2.5 py-1 rounded-lg capitalize ${typeBadge}`}
+                    >
+                      {appt.type}
+                    </span>
+                  </td>
+
+                  {/* Date */}
+                  <td className="px-4 py-3.5">
+                    <p className="text-white/70 text-sm">
+                      {formatDate(appt.date)}
+                    </p>
+                    <p className="text-white/30 text-xs">{appt.date}</p>
+                  </td>
+
+                  {/* Time */}
+                  <td className="px-4 py-3.5">
+                    <p className="text-white/60 text-sm">{appt.time}</p>
+                  </td>
+
+                  {/* Status */}
+                  <td className="px-4 py-3.5">
+                    <span
+                      className={`flex items-center gap-1.5 text-xs
+                      font-medium px-2.5 py-1 rounded-full w-fit ${badge}`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
+                      {appt.status}
+                    </span>
+                  </td>
+
+                  {/* Actions */}
+                  <td className="px-4 py-3.5 pr-5">
+                    <div className="flex items-center justify-end gap-1">
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onEdit(appt)
+                        }}
+                        className="p-1.5 rounded-lg text-white/30
+                          hover:text-indigo-400 hover:bg-indigo-500/10
+                          transition-all duration-150"
+                        title="Edit appointment"
                       >
-                        {appt.type}
-                      </span>
-                    </td>
-
-                    {/* Date */}
-                    <td className="px-4 py-3.5">
-                      <p className="text-white/70 text-sm">
-                        {formatDate(appt.date)}
-                      </p>
-                      <p className="text-white/30 text-xs">{appt.date}</p>
-                    </td>
-
-                    {/* Time */}
-                    <td className="px-4 py-3.5">
-                      <p className="text-white/60 text-sm">{appt.time}</p>
-                    </td>
-
-                    {/* Status */}
-                    <td className="px-4 py-3.5">
-                      <span
-                        className={`flex items-center gap-1.5 text-xs
-                        font-medium px-2.5 py-1 rounded-full w-fit ${badge}`}
+                        <Pencil className="w-3.5 h-3.5" />
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onDelete(appt)
+                        }}
+                        className="p-1.5 rounded-lg text-white/30
+                          hover:text-red-400 hover:bg-red-500/10
+                          transition-all duration-150"
+                        title="Delete appointment"
                       >
-                        <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
-                        {appt.status}
-                      </span>
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-4 py-3.5 pr-5">
-                      <div className="flex items-center justify-end gap-1">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="p-1.5 rounded-lg text-white/30
-                            hover:text-indigo-400 hover:bg-indigo-500/10
-                            transition-all duration-150"
-                          title="View appointment"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="p-1.5 rounded-lg text-white/30
-                            hover:text-white/60 hover:bg-white/[0.05]
-                            transition-all duration-150"
-                          title="More options"
-                        >
-                          <MoreHorizontal className="w-3.5 h-3.5" />
-                        </motion.button>
-                      </div>
-                    </td>
-                  </motion.tr>
-                )
-              })}
-            </AnimatePresence>
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </motion.button>
+                    </div>
+                  </td>
+                </motion.tr>
+              )
+            })}
           </tbody>
         </table>
       </div>
 
-      {/* ── Footer ── */}
-      <div
-        className="px-5 py-3 border-t border-white/[0.06]
-        flex items-center justify-between"
-      >
+      {/* Footer */}
+      <div className="px-5 py-3 border-t border-white/[0.06] flex items-center justify-between">
         <p className="text-white/30 text-xs">
           Showing{' '}
           <span className="text-white/60 font-medium">{sorted.length}</span> of{' '}
@@ -352,7 +336,7 @@ export default function AppointmentTable({
           appointments
         </p>
         <p className="text-white/20 text-xs">
-          Sorted by {sortField} · {sortDir === 'asc' ? '↑ A–Z' : '↓ Z–A'}
+          Sorted by {sortField} · {sortDir === 'asc' ? 'A–Z' : 'Z–A'}
         </p>
       </div>
     </motion.div>

@@ -1,21 +1,48 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { appointments } from '@/data/appointments'
-import { CalendarCheck, Clock, CheckCircle, XCircle } from 'lucide-react'
+import { CalendarCheck, Clock, CheckCircle, Timer } from 'lucide-react'
+import type { WithMeta } from '@/lib/utils/mergeData'
+import type { Appointment } from '@/types'
 
-export default function AppointmentStatBar() {
+interface AppointmentStatBarProps {
+  appointments: WithMeta<Appointment>[]
+  loading?: boolean
+}
+
+function StatSkeleton() {
+  return (
+    <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl px-5 py-4 flex items-center gap-4">
+      <div className="w-10 h-10 rounded-xl bg-white/[0.05] flex-shrink-0" />
+      <div className="flex flex-col gap-1.5">
+        <div className="h-6 w-10 bg-white/[0.06] rounded-lg" />
+        <div className="h-3 w-28 bg-white/[0.04] rounded-full" />
+      </div>
+    </div>
+  )
+}
+
+export default function AppointmentStatBar({
+  appointments,
+  loading = false,
+}: AppointmentStatBarProps) {
+  // Use state for today's date to avoid hydration mismatch
+  const [todayStr, setTodayStr] = useState('')
+
+  useEffect(() => {
+    const d = new Date()
+    setTodayStr(
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    )
+  }, [])
+
   const total = appointments.length
-  const today = appointments.filter((a) => a.date === '2025-07-14').length
-  const pending = appointments.filter(
-    (a) => a.status.toLowerCase() === 'pending'
-  ).length
-  const completed = appointments.filter(
-    (a) => a.status.toLowerCase() === 'completed'
-  ).length
-  const cancelled = appointments.filter(
-    (a) => a.status.toLowerCase() === 'cancelled'
-  ).length
+  const today = todayStr
+    ? appointments.filter((a) => a.date === todayStr).length
+    : 0
+  const pending = appointments.filter((a) => a.status === 'Pending').length
+  const completed = appointments.filter((a) => a.status === 'Completed').length
 
   const stats = [
     {
@@ -37,7 +64,7 @@ export default function AppointmentStatBar() {
     {
       label: 'Pending',
       value: pending,
-      icon: Clock,
+      icon: Timer,
       color: 'text-violet-400',
       bg: 'bg-violet-500/10',
       border: 'border-violet-500/20',
@@ -51,6 +78,16 @@ export default function AppointmentStatBar() {
       border: 'border-emerald-500/20',
     },
   ]
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <StatSkeleton key={i} />
+        ))}
+      </div>
+    )
+  }
 
   return (
     <motion.div
