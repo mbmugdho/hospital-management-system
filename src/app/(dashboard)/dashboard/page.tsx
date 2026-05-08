@@ -8,6 +8,7 @@ import TodayAppointments from '@/components/dashboard/TodayAppointments'
 import RecentPatients from '@/components/dashboard/RecentPatients'
 import QuickStats from '@/components/dashboard/QuickStats'
 import TableSkeleton from '@/components/shared/TableSkeleton'
+import SampleBanner from '@/components/shared/SampleBanner'
 
 import { patients as dummyPatients } from '@/data/patients'
 import { appointments as dummyAppointments } from '@/data/appointments'
