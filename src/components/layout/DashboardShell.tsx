@@ -25,7 +25,6 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       } = await supabase.auth.getUser()
 
       if (authUser) {
-        // Get profile data
         const { data: profile } = await supabase
           .from('profiles')
           .select('full_name, hospital_name')
@@ -45,35 +44,21 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   }, [])
 
   return (
-    <div
-      className="
-      min-h-screen w-full
-      bg-[#050505]
-      flex
-    "
-    >
-      {/* ── Sidebar ── */}
+    <div className="h-screen w-full bg-[#050505] flex overflow-hidden">
+      {/* Sidebar */}
       <Sidebar
         user={user}
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
       />
 
-      {/* ── Main Area ── */}
-      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
-        {/* ── Top Navbar ── */}
+      {/* Right column */}
+      <div className="flex-1 flex flex-col min-h-0">
+        {/* Navbar — always visible, never scrolls */}
         <DashboardNavbar user={user} onMenuClick={() => setMobileOpen(true)} />
 
-        {/* ── Page Content ── */}
-        <main
-          className="
-          flex-1
-          overflow-y-auto
-          p-4 lg:p-6
-        "
-        >
-          {children}
-        </main>
+        {/* Scrollable page content */}
+        <main className="flex-1 overflow-y-auto min-h-0">{children}</main>
       </div>
     </div>
   )
