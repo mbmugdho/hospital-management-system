@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Download, EyeOff, Eye } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Plus, Download } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 import PageHeader from '@/components/shared/PageHeader'
 import TableSkeleton from '@/components/shared/TableSkeleton'
+import SampleBanner from '@/components/shared/SampleBanner'
 import PharmacyStatBar from '@/components/pharmacy/PharmacyStatBar'
 import PharmacyFilters from '@/components/pharmacy/PharmacyFilters'
 import PharmacyTable from '@/components/pharmacy/PharmacyTable'
@@ -46,14 +47,11 @@ export default function PharmacyPage() {
   const [stockFilter, setStockFilter] = useState<StockFilter>('All')
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('All')
   const [loading, setLoading] = useState(true)
-
   const [hideSample, setHideSample] = useState(false)
   const [deletedDummyIds, setDeletedDummyIds] = useState<string[]>([])
-
   const [modalOpen, setModalOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<WithMeta<Medicine> | null>(null)
   const [isSaving, setIsSaving] = useState(false)
-
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<WithMeta<Medicine> | null>(
     null
@@ -72,8 +70,6 @@ export default function PharmacyPage() {
     setLoading(true)
     try {
       const real = await fetchMedicines()
-
-      // Map Supabase snake_case columns to Medicine type camelCase fields
       const mapped: Medicine[] = real.map((r) => ({
         id: r.id,
         name: r.name,
@@ -85,7 +81,6 @@ export default function PharmacyPage() {
         supplier: r.supplier,
         stockStatus: r.stock_status as Medicine['stockStatus'],
       }))
-
       setAllMedicines(mergeData(dummyMedicines, mapped))
     } catch {
       toast.error('Failed to load medicines')
@@ -95,7 +90,6 @@ export default function PharmacyPage() {
     }
   }, [])
 
-  // Apply sample visibility filters
   const visibleMedicines = allMedicines.filter((m) => {
     if (m._isDummy && hideSample) return false
     if (m._isDummy && deletedDummyIds.includes(m.id)) return false
@@ -131,6 +125,16 @@ export default function PharmacyPage() {
     setConfirmOpen(true)
   }
 
+  function closeModal() {
+    setModalOpen(false)
+    setEditTarget(null)
+  }
+
+  function closeConfirm() {
+    setConfirmOpen(false)
+    setDeleteTarget(null)
+  }
+
   async function handleSave(formData: {
     name: string
     category: string
@@ -162,7 +166,6 @@ export default function PharmacyPage() {
 
       if (editTarget) {
         if (editTarget._isDummy) {
-          // Update dummy medicine in local state only
           setAllMedicines((prev) =>
             prev.map((m) =>
               m._localId === editTarget._localId
@@ -183,7 +186,6 @@ export default function PharmacyPage() {
           )
           toast.success('Sample data updated — resets on refresh')
         } else {
-          // Update real medicine in Supabase
           const updated = await updateMedicine(editTarget.id, payload)
           const mapped: Medicine = {
             id: updated.id,
@@ -206,7 +208,6 @@ export default function PharmacyPage() {
           toast.success('Medicine updated successfully')
         }
       } else {
-        // Insert new real medicine
         const inserted = await insertMedicine(payload, user.id)
         const mapped: Medicine = {
           id: inserted.id,
@@ -226,7 +227,7 @@ export default function PharmacyPage() {
         toast.success('Medicine added successfully')
       }
 
-      setModalOpen(false)
+      closeModal()
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : 'Failed to save medicine'
@@ -254,8 +255,7 @@ export default function PharmacyPage() {
         )
         toast.success('Medicine deleted permanently')
       }
-      setConfirmOpen(false)
-      setDeleteTarget(null)
+      closeConfirm()
     } catch {
       toast.error('Failed to delete medicine')
     } finally {
@@ -287,7 +287,6 @@ export default function PharmacyPage() {
   return (
     <div className="min-h-screen bg-[#050505]">
       <div className="p-6 lg:p-8 space-y-6 max-w-[1440px] mx-auto">
-        {/* Header */}
         <PageHeader
           title="Pharmacy"
           subtitle="Manage medicine inventory, stock levels, and suppliers"
@@ -325,74 +324,15 @@ export default function PharmacyPage() {
           }
         />
 
-        {/* Sample data banner */}
-        <AnimatePresence>
-          {!hideSample && sampleCount > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: -8, height: 0 }}
-              animate={{ opacity: 1, y: 0, height: 'auto' }}
-              exit={{ opacity: 0, y: -8, height: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-              className="flex items-center justify-between gap-4
-                px-4 py-3 bg-indigo-500/[0.06] border border-indigo-500/[0.15] rounded-xl"
-            >
-              <p className="text-indigo-300/80 text-sm">
-                <span className="font-semibold text-indigo-300">
-                  {sampleCount} sample records
-                </span>{' '}
-                are visible. These reset on page refresh.
-              </p>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={handleClearSample}
-                  className="text-xs text-indigo-400 hover:text-indigo-300
-                    px-3 py-1.5 rounded-lg border border-indigo-500/20
-                    hover:border-indigo-500/40 transition-all duration-150"
-                >
-                  Clear Sample Data
-                </button>
-                <button
-                  onClick={toggleSample}
-                  className="text-xs text-white/40 hover:text-white/60
-                    px-3 py-1.5 rounded-lg border border-white/[0.08]
-                    hover:border-white/[0.14] transition-all duration-150
-                    flex items-center gap-1.5"
-                >
-                  <EyeOff className="w-3 h-3" />
-                  Hide
-                </button>
-              </div>
-            </motion.div>
-          )}
+        <SampleBanner
+          sampleCount={sampleCount}
+          hideSample={hideSample}
+          onToggle={toggleSample}
+          onClear={handleClearSample}
+        />
 
-          {hideSample && (
-            <motion.div
-              initial={{ opacity: 0, y: -8, height: 0 }}
-              animate={{ opacity: 1, y: 0, height: 'auto' }}
-              exit={{ opacity: 0, y: -8, height: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-              className="flex items-center justify-between gap-4
-                px-4 py-3 bg-white/[0.02] border border-white/[0.06] rounded-xl"
-            >
-              <p className="text-white/40 text-sm">Sample data is hidden.</p>
-              <button
-                onClick={toggleSample}
-                className="text-xs text-indigo-400 hover:text-indigo-300
-                  px-3 py-1.5 rounded-lg border border-indigo-500/20
-                  hover:border-indigo-500/40 transition-all duration-150
-                  flex items-center gap-1.5"
-              >
-                <Eye className="w-3 h-3" />
-                Show Sample Data
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Stat bar */}
         <PharmacyStatBar medicines={visibleMedicines} loading={loading} />
 
-        {/* Filters */}
         <PharmacyFilters
           medicines={visibleMedicines}
           stockFilter={stockFilter}
@@ -401,7 +341,6 @@ export default function PharmacyPage() {
           onCategoryChange={setCategoryFilter}
         />
 
-        {/* Table or skeleton */}
         {loading ? (
           <TableSkeleton rows={8} cols={9} />
         ) : (
@@ -416,22 +355,17 @@ export default function PharmacyPage() {
         )}
       </div>
 
-      {/* Add / Edit modal */}
       <AddMedicineModal
         isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={closeModal}
         onSave={handleSave}
         editData={editTarget}
         isSaving={isSaving}
       />
 
-      {/* Delete confirmation */}
       <ConfirmDialog
         isOpen={confirmOpen}
-        onClose={() => {
-          setConfirmOpen(false)
-          setDeleteTarget(null)
-        }}
+        onClose={closeConfirm}
         onConfirm={handleDelete}
         title="Delete Medicine"
         message={
@@ -443,7 +377,6 @@ export default function PharmacyPage() {
         isLoading={isDeleting}
       />
 
-      {/* Toasts */}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   )
