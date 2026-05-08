@@ -1,7 +1,10 @@
+// Shared page header used across all dashboard pages.
+// Supports title, subtitle, search input, primary action, and export button slots.
+
 'use client'
 
 import { motion } from 'framer-motion'
-import { Search, Plus } from 'lucide-react'
+import { Search } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 interface PageHeaderProps {
@@ -10,6 +13,7 @@ interface PageHeaderProps {
   searchValue: string
   onSearch: (v: string) => void
   action?: ReactNode
+  exportButton?: ReactNode
   searchPlaceholder?: string
 }
 
@@ -19,6 +23,7 @@ export default function PageHeader({
   searchValue,
   onSearch,
   action,
+  exportButton,
   searchPlaceholder = 'Search...',
 }: PageHeaderProps) {
   return (
@@ -26,8 +31,7 @@ export default function PageHeader({
       initial={{ opacity: 0, y: -16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-      className="flex flex-col sm:flex-row sm:items-center
-        justify-between gap-4"
+      className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
     >
       {/* Left */}
       <div>
@@ -38,7 +42,7 @@ export default function PageHeader({
       </div>
 
       {/* Right */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         {/* Search */}
         <div className="relative">
           <Search
@@ -58,20 +62,11 @@ export default function PageHeader({
           />
         </div>
 
-        {/* Action slot */}
-        {action ?? (
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="flex items-center gap-2 px-4 py-2 bg-white
-              text-black rounded-xl text-sm font-medium
-              hover:bg-white/90 transition-colors duration-200
-              whitespace-nowrap"
-          >
-            <Plus className="w-4 h-4" />
-            Add Patient
-          </motion.button>
-        )}
+        {/* Export button slot */}
+        {exportButton}
+
+        {/* Primary action slot */}
+        {action}
       </div>
     </motion.div>
   )

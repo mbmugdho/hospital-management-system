@@ -1,9 +1,28 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { patients } from '@/data/patients'
+import type { WithMeta } from '@/lib/utils/mergeData'
+import type { Patient } from '@/types'
 
-export default function PatientStatBar() {
+interface PatientStatBarProps {
+  patients: WithMeta<Patient>[]
+  loading?: boolean
+}
+
+// Single skeleton stat card
+function StatSkeleton() {
+  return (
+    <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl px-5 py-4 flex items-center justify-between">
+      <div className="h-3 w-24 bg-white/[0.06] rounded-full" />
+      <div className="h-7 w-10 bg-white/[0.06] rounded-lg" />
+    </div>
+  )
+}
+
+export default function PatientStatBar({
+  patients,
+  loading = false,
+}: PatientStatBarProps) {
   const total = patients.length
   const active = patients.filter((p) => p.status === 'Active').length
   const admitted = patients.filter((p) => p.status === 'Admitted').length
@@ -15,6 +34,16 @@ export default function PatientStatBar() {
     { label: 'Admitted', value: admitted, color: 'text-amber-400' },
     { label: 'Inactive', value: inactive, color: 'text-white/40' },
   ]
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <StatSkeleton key={i} />
+        ))}
+      </div>
+    )
+  }
 
   return (
     <motion.div
