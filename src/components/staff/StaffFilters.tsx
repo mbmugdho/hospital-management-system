@@ -2,9 +2,9 @@
 
 import { motion } from 'framer-motion'
 import { LayoutGrid, Table } from 'lucide-react'
-import { doctors } from '@/data/doctors'
+import type { WithMeta } from '@/lib/utils/mergeData'
+import type { Doctor } from '@/types'
 
-// ── Types ─────────────────────────────────────────────────────────
 export type StaffRoleFilter =
   | 'All'
   | 'Doctor'
@@ -17,6 +17,7 @@ export type StaffStatusFilter = 'All' | 'Active' | 'On Leave' | 'Inactive'
 export type ViewMode = 'grid' | 'table'
 
 interface StaffFiltersProps {
+  staff: WithMeta<Doctor>[]
   roleFilter: StaffRoleFilter
   statusFilter: StaffStatusFilter
   onRoleChange: (r: StaffRoleFilter) => void
@@ -25,7 +26,6 @@ interface StaffFiltersProps {
   onViewChange: (v: ViewMode) => void
 }
 
-// ── Role filters with counts ──────────────────────────────────────
 const roles: StaffRoleFilter[] = [
   'All',
   'Doctor',
@@ -35,14 +35,8 @@ const roles: StaffRoleFilter[] = [
   'Lab Technician',
 ]
 
-const statusFilters: {
-  label: StaffStatusFilter
-  active: string
-}[] = [
-  {
-    label: 'All',
-    active: 'bg-white/[0.08] text-white border-white/[0.12]',
-  },
+const statusFilters: { label: StaffStatusFilter; active: string }[] = [
+  { label: 'All', active: 'bg-white/[0.08] text-white border-white/[0.12]' },
   {
     label: 'Active',
     active: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
@@ -51,13 +45,11 @@ const statusFilters: {
     label: 'On Leave',
     active: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
   },
-  {
-    label: 'Inactive',
-    active: 'bg-red-500/10 text-red-400 border-red-500/20',
-  },
+  { label: 'Inactive', active: 'bg-red-500/10 text-red-400 border-red-500/20' },
 ]
 
 export default function StaffFilters({
+  staff,
   roleFilter,
   statusFilter,
   onRoleChange,
@@ -73,11 +65,7 @@ export default function StaffFilters({
       className="space-y-3"
     >
       {/* Row 1: Status filters + View toggle */}
-      <div
-        className="flex flex-col sm:flex-row sm:items-center
-        justify-between gap-3"
-      >
-        {/* Status tabs */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap">
           {statusFilters.map((f) => {
             const isActive = f.label === statusFilter
@@ -92,8 +80,7 @@ export default function StaffFilters({
                   ${
                     isActive
                       ? f.active
-                      : `bg-transparent border-white/[0.06] text-white/40
-                       hover:text-white/70 hover:border-white/[0.10]`
+                      : 'bg-transparent border-white/[0.06] text-white/40 hover:text-white/70 hover:border-white/[0.10]'
                   }`}
               >
                 {f.label}
@@ -103,18 +90,11 @@ export default function StaffFilters({
         </div>
 
         {/* View toggle */}
-        <div
-          className="flex items-center gap-1 bg-white/[0.03] border
-          border-white/[0.06] rounded-xl p-1"
-        >
+        <div className="flex items-center gap-1 bg-white/[0.03] border border-white/[0.06] rounded-xl p-1">
           <button
             onClick={() => onViewChange('grid')}
             className={`p-2 rounded-lg transition-all duration-200
-              ${
-                viewMode === 'grid'
-                  ? 'bg-white/[0.08] text-white'
-                  : 'text-white/30 hover:text-white/60'
-              }`}
+              ${viewMode === 'grid' ? 'bg-white/[0.08] text-white' : 'text-white/30 hover:text-white/60'}`}
             title="Grid view"
           >
             <LayoutGrid className="w-4 h-4" />
@@ -122,11 +102,7 @@ export default function StaffFilters({
           <button
             onClick={() => onViewChange('table')}
             className={`p-2 rounded-lg transition-all duration-200
-              ${
-                viewMode === 'table'
-                  ? 'bg-white/[0.08] text-white'
-                  : 'text-white/30 hover:text-white/60'
-              }`}
+              ${viewMode === 'table' ? 'bg-white/[0.08] text-white' : 'text-white/30 hover:text-white/60'}`}
             title="Table view"
           >
             <Table className="w-4 h-4" />
@@ -134,15 +110,15 @@ export default function StaffFilters({
         </div>
       </div>
 
-      {/* Row 2: Role/department pills */}
+      {/* Row 2: Role pills with live counts from merged data */}
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-white/30 text-xs font-medium mr-1">Role:</span>
         {roles.map((role) => {
           const isActive = role === roleFilter
           const count =
             role === 'All'
-              ? doctors.length
-              : doctors.filter((d) => d.role === role).length
+              ? staff.length
+              : staff.filter((d) => d.role === role).length
 
           return (
             <motion.button
@@ -155,8 +131,7 @@ export default function StaffFilters({
                 ${
                   isActive
                     ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                    : `bg-transparent border-white/[0.06] text-white/40
-                     hover:text-white/60 hover:border-white/[0.10]`
+                    : 'bg-transparent border-white/[0.06] text-white/40 hover:text-white/60 hover:border-white/[0.10]'
                 }`}
             >
               {role}
