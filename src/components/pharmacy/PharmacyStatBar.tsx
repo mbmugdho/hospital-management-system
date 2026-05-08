@@ -1,14 +1,41 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { medicines } from '@/data/pharmacy'
-import { Pill, Package, AlertTriangle, TrendingDown } from 'lucide-react'
+import { Pill, Package, TrendingDown, LayoutGrid } from 'lucide-react'
+import type { WithMeta } from '@/lib/utils/mergeData'
+import type { Medicine } from '@/types'
 
-export default function PharmacyStatBar() {
+interface PharmacyStatBarProps {
+  medicines: WithMeta<Medicine>[]
+  loading?: boolean
+}
+
+function StatSkeleton() {
+  return (
+    <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl px-5 py-4 flex items-center gap-4">
+      <div className="w-10 h-10 rounded-xl bg-white/[0.05] flex-shrink-0" />
+      <div className="flex flex-col gap-1.5">
+        <div className="h-5 w-16 bg-white/[0.06] rounded-lg" />
+        <div className="h-3 w-24 bg-white/[0.04] rounded-full" />
+        <div className="h-3 w-20 bg-white/[0.03] rounded-full" />
+      </div>
+    </div>
+  )
+}
+
+function fmt(n: number): string {
+  return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+}
+
+export default function PharmacyStatBar({
+  medicines,
+  loading = false,
+}: PharmacyStatBarProps) {
   const total = medicines.length
-  const totalStock = medicines.reduce((sum, m) => sum + m.stock, 0)
+  const totalStock = medicines.reduce((s, m) => s + m.stock, 0)
   const lowStock = medicines.filter((m) => m.stockStatus === 'Low').length
-  const totalValue = medicines.reduce((sum, m) => sum + m.stock * m.price, 0)
+  const totalValue = medicines.reduce((s, m) => s + m.stock * m.price, 0)
+  const categories = new Set(medicines.map((m) => m.category)).size
 
   const stats = [
     {
@@ -22,7 +49,7 @@ export default function PharmacyStatBar() {
     },
     {
       label: 'Inventory Value',
-      value: `$${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      value: fmt(totalValue),
       icon: Package,
       color: 'text-emerald-400',
       bg: 'bg-emerald-500/10',
@@ -40,14 +67,24 @@ export default function PharmacyStatBar() {
     },
     {
       label: 'Categories',
-      value: new Set(medicines.map((m) => m.category)).size.toString(),
-      icon: AlertTriangle,
+      value: categories.toString(),
+      icon: LayoutGrid,
       color: 'text-violet-400',
       bg: 'bg-violet-500/10',
       border: 'border-violet-500/20',
       sub: 'Unique categories',
     },
   ]
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <StatSkeleton key={i} />
+        ))}
+      </div>
+    )
+  }
 
   return (
     <motion.div
@@ -75,17 +112,17 @@ export default function PharmacyStatBar() {
             }}
             className="bg-white/[0.02] border border-white/[0.06] rounded-2xl
               px-5 py-4 flex items-center gap-4
-              hover:border-white/[0.10] transition-colors duration-300
-              cursor-default"
+              hover:border-white/[0.10] transition-colors duration-300 cursor-default"
           >
             <div
-              className={`p-2.5 rounded-xl ${stat.bg} border ${stat.border}
-                flex-shrink-0`}
+              className={`p-2.5 rounded-xl ${stat.bg} border ${stat.border} flex-shrink-0`}
             >
               <Icon className={`w-4 h-4 ${stat.color}`} />
             </div>
             <div>
-              <p className={`text-sm md:text-xl font-bold ${stat.color}`}>{stat.value}</p>
+              <p className={`text-sm md:text-xl font-bold ${stat.color}`}>
+                {stat.value}
+              </p>
               <p className="text-white/40 text-xs mt-0.5">{stat.label}</p>
               <p className="text-white/20 text-xs">{stat.sub}</p>
             </div>
