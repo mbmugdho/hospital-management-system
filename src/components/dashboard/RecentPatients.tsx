@@ -77,8 +77,8 @@ export default function RecentPatients({ patients }: RecentPatientsProps) {
         </button>
       </div>
 
-      {/* Column headers */}
-      <div className="grid grid-cols-[1fr_40px_120px_90px] gap-2 px-3 mb-2">
+      {/* Column headers — hidden on mobile */}
+      <div className="hidden sm:grid grid-cols-[1fr_40px_120px_90px] gap-2 px-3 mb-2">
         {['Patient', 'Age', 'Doctor', 'Status'].map((h) => (
           <span key={h} className="text-white/30 text-xs font-medium">
             {h}
@@ -106,12 +106,15 @@ export default function RecentPatients({ patients }: RecentPatientsProps) {
                 backgroundColor: 'rgba(255,255,255,0.03)',
                 transition: { duration: 0.15 },
               }}
-              className="grid grid-cols-[1fr_40px_120px_90px] gap-2
-                items-center px-3 py-2.5 rounded-xl cursor-pointer group
+              className="
+                flex flex-col gap-2
+                sm:grid sm:grid-cols-[1fr_40px_120px_90px] sm:gap-2 sm:items-center
+                px-3 py-2.5 rounded-xl cursor-pointer group
                 border border-transparent hover:border-white/[0.04]
-                transition-colors duration-150"
+                transition-colors duration-150
+              "
             >
-              {/* Name + ID */}
+              {/* Name + ID — always visible */}
               <div className="flex items-center gap-2.5 min-w-0">
                 <div
                   className="w-8 h-8 rounded-full
@@ -123,7 +126,7 @@ export default function RecentPatients({ patients }: RecentPatientsProps) {
                     {getInitials(patient.name)}
                   </span>
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p
                     className="text-white/90 text-sm font-medium truncate
                     group-hover:text-white transition-colors"
@@ -132,18 +135,39 @@ export default function RecentPatients({ patients }: RecentPatientsProps) {
                   </p>
                   <p className="text-white/30 text-xs">{patient.id}</p>
                 </div>
+
+                {/* Status on mobile — inline next to name */}
+                <div className="flex items-center gap-1.5 sm:hidden flex-shrink-0">
+                  <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
+                  <span className={`text-xs capitalize ${txtColor}`}>
+                    {patient.status}
+                  </span>
+                </div>
               </div>
 
-              {/* Age */}
-              <span className="text-white/50 text-sm">{patient.age}</span>
+              {/* Mobile detail row — age + doctor */}
+              <div className="flex items-center gap-3 pl-[42px] sm:hidden">
+                <span className="text-white/40 text-xs">
+                  Age: <span className="text-white/60">{patient.age}</span>
+                </span>
+                <span className="text-white/20">·</span>
+                <span className="text-white/40 text-xs truncate">
+                  {patient.assignedDoctor}
+                </span>
+              </div>
 
-              {/* Doctor */}
-              <span className="text-white/40 text-xs truncate">
+              {/* Age — desktop only */}
+              <span className="text-white/50 text-sm hidden sm:block">
+                {patient.age}
+              </span>
+
+              {/* Doctor — desktop only */}
+              <span className="text-white/40 text-xs truncate hidden sm:block">
                 {patient.assignedDoctor}
               </span>
 
-              {/* Status */}
-              <div className="flex items-center gap-1.5">
+              {/* Status — desktop only */}
+              <div className="items-center gap-1.5 hidden sm:flex">
                 <span
                   className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dotColor}`}
                 />

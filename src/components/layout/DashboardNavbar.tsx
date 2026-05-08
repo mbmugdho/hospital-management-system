@@ -146,20 +146,6 @@ export default function DashboardNavbar({
             focus:outline-none
           "
         />
-        <kbd
-          className="
-          hidden lg:inline-flex
-          items-center
-          px-1.5 py-0.5
-          rounded
-          bg-white/[0.04]
-          border border-white/[0.06]
-          text-[10px] text-white/20
-          font-mono
-        "
-        >
-          ⌘K
-        </kbd>
       </div>
 
       {/* ── Notification Bell ── */}
