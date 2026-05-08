@@ -1,15 +1,35 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { doctors } from '@/data/doctors'
 import { Users, UserCheck, Stethoscope, UserX } from 'lucide-react'
+import type { WithMeta } from '@/lib/utils/mergeData'
+import type { Doctor } from '@/types'
 
-export default function StaffStatBar() {
-  const total = doctors.length
-  const active = doctors.filter((d) => d.status === 'Active').length
-  const onLeave = doctors.filter((d) => d.status === 'On Leave').length
-  const inactive = doctors.filter((d) => d.status === 'Inactive').length
-  const docCount = doctors.filter((d) => d.role === 'Doctor').length
+interface StaffStatBarProps {
+  staff: WithMeta<Doctor>[]
+  loading?: boolean
+}
+
+function StatSkeleton() {
+  return (
+    <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl px-5 py-4 flex items-center gap-4">
+      <div className="w-10 h-10 rounded-xl bg-white/[0.05] flex-shrink-0" />
+      <div className="flex flex-col gap-1.5">
+        <div className="h-6 w-10 bg-white/[0.06] rounded-lg" />
+        <div className="h-3 w-20 bg-white/[0.04] rounded-full" />
+      </div>
+    </div>
+  )
+}
+
+export default function StaffStatBar({
+  staff,
+  loading = false,
+}: StaffStatBarProps) {
+  const total = staff.length
+  const active = staff.filter((d) => d.status === 'Active').length
+  const onLeave = staff.filter((d) => d.status === 'On Leave').length
+  const docCount = staff.filter((d) => d.role === 'Doctor').length
 
   const stats = [
     {
@@ -46,6 +66,16 @@ export default function StaffStatBar() {
     },
   ]
 
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <StatSkeleton key={i} />
+        ))}
+      </div>
+    )
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -72,12 +102,10 @@ export default function StaffStatBar() {
             }}
             className="bg-white/[0.02] border border-white/[0.06] rounded-2xl
               px-5 py-4 flex items-center gap-4
-              hover:border-white/[0.10] transition-colors duration-300
-              cursor-default"
+              hover:border-white/[0.10] transition-colors duration-300 cursor-default"
           >
             <div
-              className={`p-2.5 rounded-xl ${stat.bg} border ${stat.border}
-                flex-shrink-0`}
+              className={`p-2.5 rounded-xl ${stat.bg} border ${stat.border} flex-shrink-0`}
             >
               <Icon className={`w-4 h-4 ${stat.color}`} />
             </div>
