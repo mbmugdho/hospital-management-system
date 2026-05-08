@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Download, EyeOff, Eye } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Plus, Download } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 import PageHeader from '@/components/shared/PageHeader'
 import TableSkeleton from '@/components/shared/TableSkeleton'
+import SampleBanner from '@/components/shared/SampleBanner'
 import AppointmentStatBar from '@/components/appointments/AppointmentStatBar'
 import AppointmentFilters from '@/components/appointments/AppointmentFilters'
 import AppointmentTable from '@/components/appointments/AppointmentTable'
@@ -45,16 +46,13 @@ export default function AppointmentsPage() {
   const [filter, setFilter] = useState<AppointmentFilterStatus>('All')
   const [dateFilter, setDateFilter] = useState('')
   const [loading, setLoading] = useState(true)
-
   const [hideSample, setHideSample] = useState(false)
   const [deletedDummyIds, setDeletedDummyIds] = useState<string[]>([])
-
   const [modalOpen, setModalOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<WithMeta<Appointment> | null>(
     null
   )
   const [isSaving, setIsSaving] = useState(false)
-
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] =
     useState<WithMeta<Appointment> | null>(null)
@@ -72,8 +70,6 @@ export default function AppointmentsPage() {
     setLoading(true)
     try {
       const real = await fetchAppointments()
-
-      // Map Supabase snake_case to Appointment type camelCase fields
       const mapped: Appointment[] = real.map((r) => ({
         id: r.id,
         patientId: r.patient_id ?? '',
@@ -86,7 +82,6 @@ export default function AppointmentsPage() {
         status: r.status as Appointment['status'],
         notes: r.notes,
       }))
-
       setAllAppointments(mergeData(dummyAppointments, mapped))
     } catch {
       toast.error('Failed to load appointments')
@@ -96,7 +91,6 @@ export default function AppointmentsPage() {
     }
   }, [])
 
-  // Apply sample visibility filters
   const visibleAppointments = allAppointments.filter((a) => {
     if (a._isDummy && hideSample) return false
     if (a._isDummy && deletedDummyIds.includes(a.id)) return false
@@ -132,6 +126,16 @@ export default function AppointmentsPage() {
     setConfirmOpen(true)
   }
 
+  function closeModal() {
+    setModalOpen(false)
+    setEditTarget(null)
+  }
+
+  function closeConfirm() {
+    setConfirmOpen(false)
+    setDeleteTarget(null)
+  }
+
   async function handleSave(formData: {
     patient: string
     patientId: string
@@ -165,7 +169,6 @@ export default function AppointmentsPage() {
 
       if (editTarget) {
         if (editTarget._isDummy) {
-          // Update dummy row in local state only
           setAllAppointments((prev) =>
             prev.map((a) =>
               a._localId === editTarget._localId
@@ -186,7 +189,6 @@ export default function AppointmentsPage() {
           )
           toast.success('Sample data updated — resets on refresh')
         } else {
-          // Update real row in Supabase
           const updated = await updateAppointment(editTarget.id, payload)
           const mapped: Appointment = {
             id: updated.id,
@@ -210,7 +212,6 @@ export default function AppointmentsPage() {
           toast.success('Appointment updated successfully')
         }
       } else {
-        // Insert new real appointment
         const inserted = await insertAppointment(payload, user.id)
         const mapped: Appointment = {
           id: inserted.id,
@@ -231,7 +232,7 @@ export default function AppointmentsPage() {
         toast.success('Appointment booked successfully')
       }
 
-      setModalOpen(false)
+      closeModal()
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : 'Failed to save appointment'
@@ -259,8 +260,7 @@ export default function AppointmentsPage() {
         )
         toast.success('Appointment deleted permanently')
       }
-      setConfirmOpen(false)
-      setDeleteTarget(null)
+      closeConfirm()
     } catch {
       toast.error('Failed to delete appointment')
     } finally {
@@ -292,7 +292,6 @@ export default function AppointmentsPage() {
   return (
     <div className="min-h-screen bg-[#050505]">
       <div className="p-6 lg:p-8 space-y-6 max-w-[1440px] mx-auto">
-        {/* Header */}
         <PageHeader
           title="Appointments"
           subtitle="Schedule and manage all patient appointments"
@@ -330,77 +329,18 @@ export default function AppointmentsPage() {
           }
         />
 
-        {/* Sample data banner */}
-        <AnimatePresence>
-          {!hideSample && sampleCount > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: -8, height: 0 }}
-              animate={{ opacity: 1, y: 0, height: 'auto' }}
-              exit={{ opacity: 0, y: -8, height: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-              className="flex items-center justify-between gap-4
-                px-4 py-3 bg-indigo-500/[0.06] border border-indigo-500/[0.15] rounded-xl"
-            >
-              <p className="text-indigo-300/80 text-sm">
-                <span className="font-semibold text-indigo-300">
-                  {sampleCount} sample records
-                </span>{' '}
-                are visible. These reset on page refresh.
-              </p>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={handleClearSample}
-                  className="text-xs text-indigo-400 hover:text-indigo-300
-                    px-3 py-1.5 rounded-lg border border-indigo-500/20
-                    hover:border-indigo-500/40 transition-all duration-150"
-                >
-                  Clear Sample Data
-                </button>
-                <button
-                  onClick={toggleSample}
-                  className="text-xs text-white/40 hover:text-white/60
-                    px-3 py-1.5 rounded-lg border border-white/[0.08]
-                    hover:border-white/[0.14] transition-all duration-150
-                    flex items-center gap-1.5"
-                >
-                  <EyeOff className="w-3 h-3" />
-                  Hide
-                </button>
-              </div>
-            </motion.div>
-          )}
+        <SampleBanner
+          sampleCount={sampleCount}
+          hideSample={hideSample}
+          onToggle={toggleSample}
+          onClear={handleClearSample}
+        />
 
-          {hideSample && (
-            <motion.div
-              initial={{ opacity: 0, y: -8, height: 0 }}
-              animate={{ opacity: 1, y: 0, height: 'auto' }}
-              exit={{ opacity: 0, y: -8, height: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-              className="flex items-center justify-between gap-4
-                px-4 py-3 bg-white/[0.02] border border-white/[0.06] rounded-xl"
-            >
-              <p className="text-white/40 text-sm">Sample data is hidden.</p>
-              <button
-                onClick={toggleSample}
-                className="text-xs text-indigo-400 hover:text-indigo-300
-                  px-3 py-1.5 rounded-lg border border-indigo-500/20
-                  hover:border-indigo-500/40 transition-all duration-150
-                  flex items-center gap-1.5"
-              >
-                <Eye className="w-3 h-3" />
-                Show Sample Data
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Stat bar */}
         <AppointmentStatBar
           appointments={visibleAppointments}
           loading={loading}
         />
 
-        {/* Filters */}
         <AppointmentFilters
           active={filter}
           onChange={setFilter}
@@ -408,7 +348,6 @@ export default function AppointmentsPage() {
           onDateChange={setDateFilter}
         />
 
-        {/* Table or skeleton */}
         {loading ? (
           <TableSkeleton rows={8} cols={7} />
         ) : (
@@ -423,22 +362,17 @@ export default function AppointmentsPage() {
         )}
       </div>
 
-      {/* Add / Edit modal */}
       <AddAppointmentModal
         isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={closeModal}
         onSave={handleSave}
         editData={editTarget}
         isSaving={isSaving}
       />
 
-      {/* Delete confirmation */}
       <ConfirmDialog
         isOpen={confirmOpen}
-        onClose={() => {
-          setConfirmOpen(false)
-          setDeleteTarget(null)
-        }}
+        onClose={closeConfirm}
         onConfirm={handleDelete}
         title="Delete Appointment"
         message={
@@ -450,7 +384,6 @@ export default function AppointmentsPage() {
         isLoading={isDeleting}
       />
 
-      {/* Toasts */}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   )
