@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { UserPlus, Download, EyeOff, Eye } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { UserPlus, Download } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 import PageHeader from '@/components/shared/PageHeader'
 import TableSkeleton from '@/components/shared/TableSkeleton'
+import SampleBanner from '@/components/shared/SampleBanner'
 import StaffStatBar from '@/components/staff/StaffStatBar'
 import StaffFilters from '@/components/staff/StaffFilters'
 import StaffGrid from '@/components/staff/StaffGrid'
@@ -49,14 +50,11 @@ export default function StaffPage() {
   const [statusFilter, setStatusFilter] = useState<StaffStatusFilter>('All')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [loading, setLoading] = useState(true)
-
   const [hideSample, setHideSample] = useState(false)
   const [deletedDummyIds, setDeletedDummyIds] = useState<string[]>([])
-
   const [modalOpen, setModalOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<WithMeta<Doctor> | null>(null)
   const [isSaving, setIsSaving] = useState(false)
-
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<WithMeta<Doctor> | null>(
     null
@@ -75,8 +73,6 @@ export default function StaffPage() {
     setLoading(true)
     try {
       const real = await fetchDoctors()
-
-      // Map Supabase snake_case to Doctor type camelCase fields
       const mapped: Doctor[] = real.map((r) => ({
         id: r.id,
         name: r.name,
@@ -89,7 +85,6 @@ export default function StaffPage() {
         status: r.status as Doctor['status'],
         joinedAt: r.joined_at,
       }))
-
       setAllStaff(mergeData(dummyDoctors, mapped))
     } catch {
       toast.error('Failed to load staff')
@@ -132,6 +127,16 @@ export default function StaffPage() {
   function openDelete(doc: WithMeta<Doctor>) {
     setDeleteTarget(doc)
     setConfirmOpen(true)
+  }
+
+  function closeModal() {
+    setModalOpen(false)
+    setEditTarget(null)
+  }
+
+  function closeConfirm() {
+    setConfirmOpen(false)
+    setDeleteTarget(null)
   }
 
   async function handleSave(formData: {
@@ -228,7 +233,7 @@ export default function StaffPage() {
         toast.success('Staff member added successfully')
       }
 
-      setModalOpen(false)
+      closeModal()
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : 'Failed to save staff member'
@@ -256,8 +261,7 @@ export default function StaffPage() {
         )
         toast.success('Staff member deleted permanently')
       }
-      setConfirmOpen(false)
-      setDeleteTarget(null)
+      closeConfirm()
     } catch {
       toast.error('Failed to delete staff member')
     } finally {
@@ -288,7 +292,6 @@ export default function StaffPage() {
   return (
     <div className="min-h-screen bg-[#050505]">
       <div className="p-6 lg:p-8 space-y-6 max-w-[1440px] mx-auto">
-        {/* Header */}
         <PageHeader
           title="Staff"
           subtitle="Manage doctors, nurses, and all hospital staff"
@@ -326,74 +329,15 @@ export default function StaffPage() {
           }
         />
 
-        {/* Sample data banner */}
-        <AnimatePresence>
-          {!hideSample && sampleCount > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: -8, height: 0 }}
-              animate={{ opacity: 1, y: 0, height: 'auto' }}
-              exit={{ opacity: 0, y: -8, height: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-              className="flex items-center justify-between gap-4
-                px-4 py-3 bg-indigo-500/[0.06] border border-indigo-500/[0.15] rounded-xl"
-            >
-              <p className="text-indigo-300/80 text-sm">
-                <span className="font-semibold text-indigo-300">
-                  {sampleCount} sample records
-                </span>{' '}
-                are visible. These reset on page refresh.
-              </p>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={handleClearSample}
-                  className="text-xs text-indigo-400 hover:text-indigo-300
-                    px-3 py-1.5 rounded-lg border border-indigo-500/20
-                    hover:border-indigo-500/40 transition-all duration-150"
-                >
-                  Clear Sample Data
-                </button>
-                <button
-                  onClick={toggleSample}
-                  className="text-xs text-white/40 hover:text-white/60
-                    px-3 py-1.5 rounded-lg border border-white/[0.08]
-                    hover:border-white/[0.14] transition-all duration-150
-                    flex items-center gap-1.5"
-                >
-                  <EyeOff className="w-3 h-3" />
-                  Hide
-                </button>
-              </div>
-            </motion.div>
-          )}
+        <SampleBanner
+          sampleCount={sampleCount}
+          hideSample={hideSample}
+          onToggle={toggleSample}
+          onClear={handleClearSample}
+        />
 
-          {hideSample && (
-            <motion.div
-              initial={{ opacity: 0, y: -8, height: 0 }}
-              animate={{ opacity: 1, y: 0, height: 'auto' }}
-              exit={{ opacity: 0, y: -8, height: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-              className="flex items-center justify-between gap-4
-                px-4 py-3 bg-white/[0.02] border border-white/[0.06] rounded-xl"
-            >
-              <p className="text-white/40 text-sm">Sample data is hidden.</p>
-              <button
-                onClick={toggleSample}
-                className="text-xs text-indigo-400 hover:text-indigo-300
-                  px-3 py-1.5 rounded-lg border border-indigo-500/20
-                  hover:border-indigo-500/40 transition-all duration-150
-                  flex items-center gap-1.5"
-              >
-                <Eye className="w-3 h-3" />
-                Show Sample Data
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Stat bar */}
         <StaffStatBar staff={visibleStaff} loading={loading} />
 
-        {/* Filters */}
         <StaffFilters
           staff={visibleStaff}
           roleFilter={roleFilter}
@@ -404,7 +348,6 @@ export default function StaffPage() {
           onViewChange={setViewMode}
         />
 
-        {/* Grid or Table or Skeleton */}
         {loading ? (
           <TableSkeleton rows={8} cols={viewMode === 'table' ? 8 : 4} />
         ) : viewMode === 'grid' ? (
@@ -428,22 +371,17 @@ export default function StaffPage() {
         )}
       </div>
 
-      {/* Add / Edit modal */}
       <AddStaffModal
         isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={closeModal}
         onSave={handleSave}
         editData={editTarget}
         isSaving={isSaving}
       />
 
-      {/* Delete confirmation */}
       <ConfirmDialog
         isOpen={confirmOpen}
-        onClose={() => {
-          setConfirmOpen(false)
-          setDeleteTarget(null)
-        }}
+        onClose={closeConfirm}
         onConfirm={handleDelete}
         title="Delete Staff Member"
         message={
@@ -455,7 +393,6 @@ export default function StaffPage() {
         isLoading={isDeleting}
       />
 
-      {/* Toasts */}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   )
