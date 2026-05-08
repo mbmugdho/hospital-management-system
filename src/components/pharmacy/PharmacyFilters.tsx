@@ -1,28 +1,22 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { medicines } from '@/data/pharmacy'
+import type { WithMeta } from '@/lib/utils/mergeData'
+import type { Medicine } from '@/types'
 
-// ── Types ─────────────────────────────────────────────────────────
 export type StockFilter = 'All' | 'High' | 'Medium' | 'Low'
 export type CategoryFilter = string
 
 interface PharmacyFiltersProps {
+  medicines: WithMeta<Medicine>[]
   stockFilter: StockFilter
   categoryFilter: CategoryFilter
   onStockChange: (s: StockFilter) => void
   onCategoryChange: (c: CategoryFilter) => void
 }
 
-// ── Stock filter tabs ─────────────────────────────────────────────
-const stockFilters: {
-  label: StockFilter
-  active: string
-}[] = [
-  {
-    label: 'All',
-    active: 'bg-white/[0.08] text-white border-white/[0.12]',
-  },
+const stockFilters: { label: StockFilter; active: string }[] = [
+  { label: 'All', active: 'bg-white/[0.08] text-white border-white/[0.12]' },
   {
     label: 'High',
     active: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
@@ -31,24 +25,22 @@ const stockFilters: {
     label: 'Medium',
     active: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
   },
-  {
-    label: 'Low',
-    active: 'bg-red-500/10 text-red-400 border-red-500/20',
-  },
-]
-
-// ── Get unique categories from data ───────────────────────────────
-const categories = [
-  'All',
-  ...Array.from(new Set(medicines.map((m) => m.category))).sort(),
+  { label: 'Low', active: 'bg-red-500/10 text-red-400 border-red-500/20' },
 ]
 
 export default function PharmacyFilters({
+  medicines,
   stockFilter,
   categoryFilter,
   onStockChange,
   onCategoryChange,
 }: PharmacyFiltersProps) {
+  // Derive unique categories from the live merged data
+  const categories = [
+    'All',
+    ...Array.from(new Set(medicines.map((m) => m.category))).sort(),
+  ]
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -72,8 +64,7 @@ export default function PharmacyFilters({
                 ${
                   isActive
                     ? f.active
-                    : `bg-transparent border-white/[0.06] text-white/40
-                     hover:text-white/70 hover:border-white/[0.10]`
+                    : 'bg-transparent border-white/[0.06] text-white/40 hover:text-white/70 hover:border-white/[0.10]'
                 }`}
             >
               {f.label}
@@ -82,7 +73,7 @@ export default function PharmacyFilters({
         })}
       </div>
 
-      {/* Row 2: Category pills */}
+      {/* Row 2: Category pills with live counts */}
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-white/30 text-xs font-medium mr-1">
           Category:
@@ -105,8 +96,7 @@ export default function PharmacyFilters({
                 ${
                   isActive
                     ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                    : `bg-transparent border-white/[0.06] text-white/40
-                     hover:text-white/60 hover:border-white/[0.10]`
+                    : 'bg-transparent border-white/[0.06] text-white/40 hover:text-white/60 hover:border-white/[0.10]'
                 }`}
             >
               {cat}
