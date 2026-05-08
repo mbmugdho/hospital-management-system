@@ -5,7 +5,6 @@ import { motion } from 'framer-motion'
 import { TrendingUp } from 'lucide-react'
 import dynamic from 'next/dynamic'
 
-// ✅ Dynamically import Recharts — disables SSR for the chart
 const BarChart = dynamic(() => import('recharts').then((m) => m.BarChart), {
   ssr: false,
 })
@@ -28,7 +27,8 @@ const ResponsiveContainer = dynamic(
   { ssr: false }
 )
 
-const data = [
+// Dummy baseline chart data — always populated so chart never looks empty
+const chartData = [
   { month: 'Jul', revenue: 62000, expenses: 41000 },
   { month: 'Aug', revenue: 75000, expenses: 48000 },
   { month: 'Sep', revenue: 68000, expenses: 44000 },
@@ -37,6 +37,12 @@ const data = [
   { month: 'Dec', revenue: 91000, expenses: 57000 },
   { month: 'Jan', revenue: 94210, expenses: 61000 },
 ]
+
+interface RevenueChartProps {
+  totalRevenue: number
+  totalExpenses: number
+  netProfit: number
+}
 
 interface TooltipPayload {
   value: number
@@ -51,34 +57,33 @@ interface CustomTooltipProps {
 }
 
 function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
-  if (active && payload && payload.length) {
-    return (
-      <div
-        className="bg-[#0A0A0A] border border-white/[0.08] rounded-xl
-        p-3 shadow-2xl"
-      >
-        <p className="text-white/50 text-xs mb-2">{label}</p>
-        {payload.map((entry) => (
-          <div key={entry.name} className="flex items-center gap-2 text-sm">
-            <span
-              className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: entry.color }}
-            />
-            <span className="text-white/70 capitalize">{entry.name}:</span>
-            <span className="text-white font-semibold">
-              ${entry.value.toLocaleString()}
-            </span>
-          </div>
-        ))}
-      </div>
-    )
-  }
-  return null
+  if (!active || !payload?.length) return null
+  return (
+    <div className="bg-[#0A0A0A] border border-white/[0.08] rounded-xl p-3 shadow-2xl">
+      <p className="text-white/50 text-xs mb-2">{label}</p>
+      {payload.map((entry) => (
+        <div key={entry.name} className="flex items-center gap-2 text-sm">
+          <span
+            className="w-2 h-2 rounded-full"
+            style={{ backgroundColor: entry.color }}
+          />
+          <span className="text-white/70 capitalize">{entry.name}:</span>
+          <span className="text-white font-semibold">
+            ${entry.value.toLocaleString()}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
 }
 
-export default function RevenueChart() {
-  // ✅ Only render chart after client has mounted
+export default function RevenueChart({
+  totalRevenue,
+  totalExpenses,
+  netProfit,
+}: RevenueChartProps) {
   const [mounted, setMounted] = useState(false)
+
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -118,17 +123,16 @@ export default function RevenueChart() {
         </div>
       </div>
 
-      {/* Chart — only renders on client */}
+      {/* Chart */}
       <div className="h-64 w-full">
         {mounted ? (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
-              data={data}
+              data={chartData}
               barGap={4}
               barCategoryGap="30%"
               margin={{ top: 4, right: 4, bottom: 0, left: -10 }}
             >
-              {/* ✅ defs inside BarChart, not outside */}
               <defs>
                 <linearGradient
                   id="revenueGradient"
@@ -141,7 +145,6 @@ export default function RevenueChart() {
                   <stop offset="100%" stopColor="#6366F1" stopOpacity={0.4} />
                 </linearGradient>
               </defs>
-
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="rgba(255,255,255,0.04)"
@@ -178,11 +181,7 @@ export default function RevenueChart() {
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          /* ✅ Skeleton shown during SSR / before mount */
-          <div
-            className="h-full w-full flex items-end justify-between
-            gap-2 pb-6 px-2"
-          >
+          <div className="h-full w-full flex items-end justify-between gap-2 pb-6 px-2">
             {[62, 75, 68, 82, 79, 91, 94].map((h, i) => (
               <div
                 key={i}
@@ -194,23 +193,24 @@ export default function RevenueChart() {
         )}
       </div>
 
-      {/* Summary row */}
-      <div
-        className="grid grid-cols-3 gap-4 mt-6 pt-6
-        border-t border-white/[0.06]"
-      >
+      {/* Summary row — uses real merged totals from props */}
+      <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/[0.06]">
         {[
           {
             label: 'Total Revenue',
-            value: '$551,210',
+            value: `$${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
             color: 'text-indigo-400',
           },
           {
             label: 'Total Expenses',
-            value: '$352,000',
+            value: `$${totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
             color: 'text-white/60',
           },
-          { label: 'Net Profit', value: '$199,210', color: 'text-emerald-400' },
+          {
+            label: 'Net Profit',
+            value: `$${netProfit.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+            color: 'text-emerald-400',
+          },
         ].map((item) => (
           <div key={item.label} className="text-center">
             <p className={`text-lg font-bold ${item.color}`}>{item.value}</p>
