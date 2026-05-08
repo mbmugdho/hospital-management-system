@@ -1,25 +1,55 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { invoices } from '@/data/billing'
 import { DollarSign, CheckCircle, Clock, AlertTriangle } from 'lucide-react'
+import type { WithMeta } from '@/lib/utils/mergeData'
+import type { Invoice } from '@/types'
 
-export default function BillingStatBar() {
-  const totalRevenue = invoices.reduce((sum, inv) => sum + inv.total, 0)
+interface BillingStatBarProps {
+  invoices: WithMeta<Invoice>[]
+  loading?: boolean
+}
+
+function StatSkeleton() {
+  return (
+    <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl px-5 py-4 flex items-center gap-4">
+      <div className="w-10 h-10 rounded-xl bg-white/[0.05] flex-shrink-0" />
+      <div className="flex flex-col gap-1.5">
+        <div className="h-5 w-24 bg-white/[0.06] rounded-lg" />
+        <div className="h-3 w-16 bg-white/[0.04] rounded-full" />
+        <div className="h-3 w-20 bg-white/[0.03] rounded-full" />
+      </div>
+    </div>
+  )
+}
+
+function fmt(n: number): string {
+  return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+}
+
+export default function BillingStatBar({
+  invoices,
+  loading = false,
+}: BillingStatBarProps) {
+  const totalRevenue = invoices.reduce((s, inv) => s + inv.total, 0)
   const paidTotal = invoices
-    .filter((inv) => inv.status === 'Paid')
-    .reduce((sum, inv) => sum + inv.total, 0)
+    .filter((i) => i.status === 'Paid')
+    .reduce((s, i) => s + i.total, 0)
   const unpaidTotal = invoices
-    .filter((inv) => inv.status === 'Unpaid')
-    .reduce((sum, inv) => sum + inv.total, 0)
+    .filter((i) => i.status === 'Unpaid')
+    .reduce((s, i) => s + i.total, 0)
   const partialTotal = invoices
-    .filter((inv) => inv.status === 'Partial')
-    .reduce((sum, inv) => sum + inv.total, 0)
+    .filter((i) => i.status === 'Partial')
+    .reduce((s, i) => s + i.total, 0)
+
+  const paidCount = invoices.filter((i) => i.status === 'Paid').length
+  const unpaidCount = invoices.filter((i) => i.status === 'Unpaid').length
+  const partialCount = invoices.filter((i) => i.status === 'Partial').length
 
   const stats = [
     {
       label: 'Total Revenue',
-      value: `$${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      value: fmt(totalRevenue),
       icon: DollarSign,
       color: 'text-indigo-400',
       bg: 'bg-indigo-500/10',
@@ -28,32 +58,42 @@ export default function BillingStatBar() {
     },
     {
       label: 'Paid',
-      value: `$${paidTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      value: fmt(paidTotal),
       icon: CheckCircle,
       color: 'text-emerald-400',
       bg: 'bg-emerald-500/10',
       border: 'border-emerald-500/20',
-      sub: `${invoices.filter((i) => i.status === 'Paid').length} invoices`,
+      sub: `${paidCount} invoices`,
     },
     {
       label: 'Unpaid',
-      value: `$${unpaidTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      value: fmt(unpaidTotal),
       icon: Clock,
       color: 'text-amber-400',
       bg: 'bg-amber-500/10',
       border: 'border-amber-500/20',
-      sub: `${invoices.filter((i) => i.status === 'Unpaid').length} invoices`,
+      sub: `${unpaidCount} invoices`,
     },
     {
       label: 'Partial',
-      value: `$${partialTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      value: fmt(partialTotal),
       icon: AlertTriangle,
       color: 'text-violet-400',
       bg: 'bg-violet-500/10',
       border: 'border-violet-500/20',
-      sub: `${invoices.filter((i) => i.status === 'Partial').length} invoices`,
+      sub: `${partialCount} invoices`,
     },
   ]
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <StatSkeleton key={i} />
+        ))}
+      </div>
+    )
+  }
 
   return (
     <motion.div
@@ -81,12 +121,10 @@ export default function BillingStatBar() {
             }}
             className="bg-white/[0.02] border border-white/[0.06] rounded-2xl
               px-5 py-4 flex items-center gap-4
-              hover:border-white/[0.10] transition-colors duration-300
-              cursor-default"
+              hover:border-white/[0.10] transition-colors duration-300 cursor-default"
           >
             <div
-              className={`p-2.5 rounded-xl ${stat.bg} border ${stat.border}
-                flex-shrink-0`}
+              className={`p-2.5 rounded-xl ${stat.bg} border ${stat.border} flex-shrink-0`}
             >
               <Icon className={`w-4 h-4 ${stat.color}`} />
             </div>
