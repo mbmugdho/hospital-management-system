@@ -1,7 +1,3 @@
-// Generates a professional PDF report using the browser's print API.
-// No external PDF library needed — uses styled HTML printed to PDF.
-// Works for both dashboard reports and individual invoice PDFs.
-
 export interface PDFSection {
   title: string
   headers: string[]
@@ -16,7 +12,6 @@ export interface PDFReportConfig {
   summary?: { label: string; value: string }[]
 }
 
-// Build HTML string for the PDF report
 function buildReportHTML(config: PDFReportConfig): string {
   const summaryHTML = config.summary
     ? `
@@ -209,19 +204,54 @@ function buildReportHTML(config: PDFReportConfig): string {
   `
 }
 
-// Open print dialog with styled HTML — browser saves as PDF
+// Uses an invisible iframe instead of window.open to avoid popup blockers.
+// The iframe renders the styled HTML then triggers print dialog.
+// After print completes or is cancelled, the iframe is removed.
 export function exportToPDF(config: PDFReportConfig): void {
   const html = buildReportHTML(config)
-  const printWindow = window.open('', '_blank', 'width=900,height=700')
-  if (!printWindow) return
 
-  printWindow.document.write(html)
-  printWindow.document.close()
+  // Remove any previous export iframe
+  const existingFrame = document.getElementById('medicore-pdf-frame')
+  if (existingFrame) existingFrame.remove()
 
-  // Wait for content to load then trigger print
-  printWindow.onload = () => {
-    printWindow.focus()
-    printWindow.print()
-    printWindow.close()
+  // Create hidden iframe
+  const iframe = document.createElement('iframe')
+  iframe.id = 'medicore-pdf-frame'
+  iframe.style.position = 'fixed'
+  iframe.style.top = '-10000px'
+  iframe.style.left = '-10000px'
+  iframe.style.width = '900px'
+  iframe.style.height = '700px'
+  iframe.style.border = 'none'
+  document.body.appendChild(iframe)
+
+  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
+  if (!iframeDoc) {
+    iframe.remove()
+    return
   }
+
+  iframeDoc.open()
+  iframeDoc.write(html)
+  iframeDoc.close()
+
+  // Wait for content to render then trigger print
+  // Using setTimeout because iframe onload is unreliable for document.write
+  setTimeout(() => {
+    try {
+      iframe.contentWindow?.focus()
+      iframe.contentWindow?.print()
+    } catch {
+      // Fallback: open in new tab if iframe print fails
+      const blob = new Blob([html], { type: 'text/html' })
+      const url = URL.createObjectURL(blob)
+      window.open(url, '_blank')
+      setTimeout(() => URL.revokeObjectURL(url), 10000)
+    }
+
+    // Clean up iframe after a delay to let print dialog finish
+    setTimeout(() => {
+      iframe.remove()
+    }, 1000)
+  }, 500)
 }
