@@ -2,10 +2,9 @@
 
 import { motion } from 'framer-motion'
 import { Users, ChevronRight, ArrowUpRight } from 'lucide-react'
-import { patients } from '@/data/patients'
+import type { WithMeta } from '@/lib/utils/mergeData'
 import type { Patient } from '@/types'
 
-// ✅ Matches your actual status values exactly
 const statusDot: Record<string, string> = {
   active: 'bg-emerald-500',
   admitted: 'bg-amber-500',
@@ -42,8 +41,12 @@ const rowVariants = {
   },
 }
 
-export default function RecentPatients() {
-  const recent: Patient[] = patients.slice(0, 8)
+interface RecentPatientsProps {
+  patients: WithMeta<Patient>[]
+}
+
+export default function RecentPatients({ patients }: RecentPatientsProps) {
+  const recent = patients.slice(0, 8)
 
   return (
     <motion.div
@@ -53,7 +56,7 @@ export default function RecentPatients() {
       className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6
         hover:border-white/[0.10] transition-colors duration-300"
     >
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-violet-500/10 rounded-xl">
@@ -74,7 +77,7 @@ export default function RecentPatients() {
         </button>
       </div>
 
-      {/* ── Column headers ── */}
+      {/* Column headers */}
       <div className="grid grid-cols-[1fr_40px_120px_90px] gap-2 px-3 mb-2">
         {['Patient', 'Age', 'Doctor', 'Status'].map((h) => (
           <span key={h} className="text-white/30 text-xs font-medium">
@@ -83,7 +86,7 @@ export default function RecentPatients() {
         ))}
       </div>
 
-      {/* ── Rows ── */}
+      {/* Rows */}
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -97,7 +100,7 @@ export default function RecentPatients() {
 
           return (
             <motion.div
-              key={patient.id}
+              key={patient._localId}
               variants={rowVariants}
               whileHover={{
                 backgroundColor: 'rgba(255,255,255,0.03)',
@@ -134,9 +137,9 @@ export default function RecentPatients() {
               {/* Age */}
               <span className="text-white/50 text-sm">{patient.age}</span>
 
-              {/* Assigned Doctor — truncated */}
+              {/* Doctor */}
               <span className="text-white/40 text-xs truncate">
-                {patient.assignedDoctor} {/* ✅ real field */}
+                {patient.assignedDoctor}
               </span>
 
               {/* Status */}
