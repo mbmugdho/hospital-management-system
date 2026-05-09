@@ -76,7 +76,7 @@ export default function DashboardPage() {
               id: r.id,
               name: r.name,
               age: r.age,
-              gender: r.gender,
+              gender: r.gender as Patient['gender'],
               bloodGroup: r.blood_group,
               phone: r.phone,
               email: r.email,

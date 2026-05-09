@@ -43,7 +43,7 @@ const techStack = [
 
 export default function About() {
   return (
-    <section id="about" className="py-20 lg:py-28">
+    <section id="about" className="py-4 lg:py-6">
       <Container>
         {/* Top — mission statement with accent line */}
         <div className="grid lg:grid-cols-[1fr_1.2fr] gap-12 lg:gap-20 mb-20">
