@@ -4,6 +4,7 @@ import Stats from '@/components/landing/Stats'
 import Features from '@/components/landing/Features'
 import HowItWorks from '@/components/landing/HowItWorks'
 import Testimonials from '@/components/landing/Testimonials'
+import About from '@/components/landing/About'
 import Pricing from '@/components/landing/Pricing'
 import FAQ from '@/components/landing/FAQ'
 import CtaBanner from '@/components/landing/CtaBanner'
@@ -12,7 +13,6 @@ import Footer from '@/components/landing/Footer'
 export default function LandingPage() {
   return (
     <div className="min-h-screen w-full relative bg-black">
-      {/* Global indigo cosmos background */}
       <div
         className="absolute inset-0 z-0 pointer-events-none"
         style={{
@@ -29,6 +29,7 @@ export default function LandingPage() {
           <Features />
           <HowItWorks />
           <Testimonials />
+          <About />
           <Pricing />
           <FAQ />
           <CtaBanner />
