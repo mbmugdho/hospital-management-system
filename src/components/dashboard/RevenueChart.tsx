@@ -1,42 +1,24 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { TrendingUp } from 'lucide-react'
 import dynamic from 'next/dynamic'
 
-const BarChart = dynamic(() => import('recharts').then((m) => m.BarChart), {
+// Entire chart tree loaded client-only — eliminates width -1 on navigation
+const RevenueChartInner = dynamic(() => import('./RevenueChartInner'), {
   ssr: false,
+  loading: () => (
+    <div className="h-full w-full flex items-end justify-between gap-2 pb-6 px-2">
+      {[62, 75, 68, 82, 79, 91, 94].map((h, i) => (
+        <div
+          key={i}
+          className="flex-1 bg-white/[0.04] rounded-t-lg animate-pulse"
+          style={{ height: `${(h / 100) * 70}%` }}
+        />
+      ))}
+    </div>
+  ),
 })
-const Bar = dynamic(() => import('recharts').then((m) => m.Bar), { ssr: false })
-const XAxis = dynamic(() => import('recharts').then((m) => m.XAxis), {
-  ssr: false,
-})
-const YAxis = dynamic(() => import('recharts').then((m) => m.YAxis), {
-  ssr: false,
-})
-const CartesianGrid = dynamic(
-  () => import('recharts').then((m) => m.CartesianGrid),
-  { ssr: false }
-)
-const Tooltip = dynamic(() => import('recharts').then((m) => m.Tooltip), {
-  ssr: false,
-})
-const ResponsiveContainer = dynamic(
-  () => import('recharts').then((m) => m.ResponsiveContainer),
-  { ssr: false }
-)
-
-// Dummy baseline chart data — always populated so chart never looks empty
-const chartData = [
-  { month: 'Jul', revenue: 62000, expenses: 41000 },
-  { month: 'Aug', revenue: 75000, expenses: 48000 },
-  { month: 'Sep', revenue: 68000, expenses: 44000 },
-  { month: 'Oct', revenue: 82000, expenses: 52000 },
-  { month: 'Nov', revenue: 79000, expenses: 49000 },
-  { month: 'Dec', revenue: 91000, expenses: 57000 },
-  { month: 'Jan', revenue: 94210, expenses: 61000 },
-]
 
 interface RevenueChartProps {
   totalRevenue: number
@@ -44,50 +26,11 @@ interface RevenueChartProps {
   netProfit: number
 }
 
-interface TooltipPayload {
-  value: number
-  name: string
-  color: string
-}
-
-interface CustomTooltipProps {
-  active?: boolean
-  payload?: TooltipPayload[]
-  label?: string
-}
-
-function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
-  if (!active || !payload?.length) return null
-  return (
-    <div className="bg-[#0A0A0A] border border-white/[0.08] rounded-xl p-3 shadow-2xl">
-      <p className="text-white/50 text-xs mb-2">{label}</p>
-      {payload.map((entry) => (
-        <div key={entry.name} className="flex items-center gap-2 text-sm">
-          <span
-            className="w-2 h-2 rounded-full"
-            style={{ backgroundColor: entry.color }}
-          />
-          <span className="text-white/70 capitalize">{entry.name}:</span>
-          <span className="text-white font-semibold">
-            ${entry.value.toLocaleString()}
-          </span>
-        </div>
-      ))}
-    </div>
-  )
-}
-
 export default function RevenueChart({
   totalRevenue,
   totalExpenses,
   netProfit,
 }: RevenueChartProps) {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -123,77 +66,12 @@ export default function RevenueChart({
         </div>
       </div>
 
-      {/* Chart */}
-      <div className="h-64 w-full">
-        {mounted ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={chartData}
-              barGap={4}
-              barCategoryGap="30%"
-              margin={{ top: 4, right: 4, bottom: 0, left: -10 }}
-            >
-              <defs>
-                <linearGradient
-                  id="revenueGradient"
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
-                  <stop offset="0%" stopColor="#6366F1" stopOpacity={0.9} />
-                  <stop offset="100%" stopColor="#6366F1" stopOpacity={0.4} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="rgba(255,255,255,0.04)"
-                vertical={false}
-              />
-              <XAxis
-                dataKey="month"
-                tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 12 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
-              />
-              <Tooltip
-                content={<CustomTooltip />}
-                cursor={{ fill: 'rgba(255,255,255,0.03)' }}
-              />
-              <Bar
-                dataKey="expenses"
-                fill="rgba(255,255,255,0.08)"
-                radius={[6, 6, 0, 0]}
-                name="expenses"
-              />
-              <Bar
-                dataKey="revenue"
-                fill="url(#revenueGradient)"
-                radius={[6, 6, 0, 0]}
-                name="revenue"
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        ) : (
-          <div className="h-full w-full flex items-end justify-between gap-2 pb-6 px-2">
-            {[62, 75, 68, 82, 79, 91, 94].map((h, i) => (
-              <div
-                key={i}
-                className="flex-1 bg-white/[0.04] rounded-t-lg animate-pulse"
-                style={{ height: `${(h / 100) * 70}%` }}
-              />
-            ))}
-          </div>
-        )}
+      {/* Chart — min-w-0 ensures flex parent reports correct width */}
+      <div className="h-64 w-full min-w-0">
+        <RevenueChartInner />
       </div>
 
-      {/* Summary row — uses real merged totals from props */}
+      {/* Summary row */}
       <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/[0.06]">
         {[
           {
