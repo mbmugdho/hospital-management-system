@@ -4,7 +4,7 @@ A modern, full-featured hospital management system built with Next.js, Supabase,
 
 ## 🚀 Live Demo
 
-👉 [View Live Demo](https://medicore.vercel.app) <!-- Update with your deployed URL -->
+👉 [View Live Demo](https://medicore-org.vercel.app/) <!-- Update with your deployed URL -->
 
 ## ✨ Features
 
