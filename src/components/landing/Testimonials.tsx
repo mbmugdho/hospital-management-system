@@ -116,7 +116,7 @@ export default function Testimonials() {
   const others = testimonials.filter((t) => !t.featured)
 
   return (
-    <section id="testimonials" className="py-20 lg:py-28">
+    <section id="testimonials" className="py-4 lg:py-6">
       <Container>
         {/* Header — left aligned */}
         <div className="max-w-xl mb-14 lg:mb-16">

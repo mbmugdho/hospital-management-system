@@ -42,7 +42,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-20 lg:py-28">
+    <section id="how-it-works" className="py-4 lg:py-6">
       <Container>
         {/* Header — left aligned */}
         <div className="max-w-xl mb-16 lg:mb-20">

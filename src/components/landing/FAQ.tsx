@@ -37,7 +37,7 @@ export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
   return (
-    <section id="faq" className="py-20 lg:py-28">
+    <section id="faq" className="py-4 lg:py-6">
       <Container>
         <div className="grid lg:grid-cols-[1fr_1.5fr] gap-12 lg:gap-20">
           {/* Left — header (stays sticky on desktop) */}
