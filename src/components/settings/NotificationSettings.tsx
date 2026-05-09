@@ -1,24 +1,56 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   Mail,
   Bell,
   MessageSquare,
-  Save,
+  Loader2,
   Calendar,
   AlertTriangle,
   UserPlus,
   DollarSign,
 } from 'lucide-react'
+import type { useToast } from '@/components/shared/Toast'
 
-interface ToggleProps {
-  enabled: boolean
-  onChange: () => void
+interface NotificationSettingsProps {
+  toast: ReturnType<typeof useToast>['toast']
 }
 
-function Toggle({ enabled, onChange }: ToggleProps) {
+const STORAGE_KEY = 'medicore_notification_prefs'
+
+interface Prefs {
+  channels: { email: boolean; push: boolean; sms: boolean }
+  alerts: {
+    appointments: boolean
+    emergencies: boolean
+    newPatients: boolean
+    billing: boolean
+    stockAlerts: boolean
+    staffChanges: boolean
+  }
+}
+
+const DEFAULT_PREFS: Prefs = {
+  channels: { email: true, push: true, sms: false },
+  alerts: {
+    appointments: true,
+    emergencies: true,
+    newPatients: true,
+    billing: false,
+    stockAlerts: true,
+    staffChanges: false,
+  },
+}
+
+function Toggle({
+  enabled,
+  onChange,
+}: {
+  enabled: boolean
+  onChange: () => void
+}) {
   return (
     <motion.button
       onClick={onChange}
@@ -35,82 +67,102 @@ function Toggle({ enabled, onChange }: ToggleProps) {
   )
 }
 
-export default function NotificationSettings() {
-  const [saved, setSaved] = useState(false)
+export default function NotificationSettings({
+  toast,
+}: NotificationSettingsProps) {
+  const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS)
+  const [isSaving, setIsSaving] = useState(false)
+  const [loaded, setLoaded] = useState(false)
 
-  const [channels, setChannels] = useState({
-    email: true,
-    push: true,
-    sms: false,
-  })
+  // Load from localStorage on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (raw) setPrefs(JSON.parse(raw) as Prefs)
+    } catch {}
+    setLoaded(true)
+  }, [])
 
-  const [alerts, setAlerts] = useState({
-    appointments: true,
-    emergencies: true,
-    newPatients: true,
-    billing: false,
-    stockAlerts: true,
-    staffChanges: false,
-  })
-
-  function toggleChannel(key: keyof typeof channels) {
-    setChannels((prev) => ({ ...prev, [key]: !prev[key] }))
-    setSaved(false)
+  function toggleChannel(key: keyof Prefs['channels']) {
+    setPrefs((p) => ({
+      ...p,
+      channels: { ...p.channels, [key]: !p.channels[key] },
+    }))
   }
 
-  function toggleAlert(key: keyof typeof alerts) {
-    setAlerts((prev) => ({ ...prev, [key]: !prev[key] }))
-    setSaved(false)
+  function toggleAlert(key: keyof Prefs['alerts']) {
+    setPrefs((p) => ({ ...p, alerts: { ...p.alerts, [key]: !p.alerts[key] } }))
   }
 
-  function handleSave() {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+  async function handleSave() {
+    setIsSaving(true)
+    await new Promise((r) => setTimeout(r, 400))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs))
+    setIsSaving(false)
+    toast.success('Notification preferences saved')
   }
 
-  const alertItems: {
-    key: keyof typeof alerts
-    label: string
-    desc: string
-    icon: typeof Bell
-  }[] = [
+  const channelItems = [
     {
-      key: 'appointments',
+      key: 'email' as const,
+      label: 'Email Notifications',
+      desc: 'Receive updates via email',
+      icon: Mail,
+    },
+    {
+      key: 'push' as const,
+      label: 'Push Notifications',
+      desc: 'Browser and mobile push',
+      icon: Bell,
+    },
+    {
+      key: 'sms' as const,
+      label: 'SMS Notifications',
+      desc: 'Text message alerts',
+      icon: MessageSquare,
+    },
+  ]
+
+  const alertItems = [
+    {
+      key: 'appointments' as const,
       label: 'Appointment Reminders',
-      desc: 'Get notified about upcoming appointments',
+      desc: 'Upcoming appointments',
       icon: Calendar,
     },
     {
-      key: 'emergencies',
+      key: 'emergencies' as const,
       label: 'Emergency Alerts',
-      desc: 'Critical patient alerts and emergencies',
+      desc: 'Critical patient alerts',
       icon: AlertTriangle,
     },
     {
-      key: 'newPatients',
+      key: 'newPatients' as const,
       label: 'New Patient Registration',
-      desc: 'When a new patient is registered',
+      desc: 'When a new patient is added',
       icon: UserPlus,
     },
     {
-      key: 'billing',
+      key: 'billing' as const,
       label: 'Billing Updates',
-      desc: 'Invoice payments and billing changes',
+      desc: 'Invoice and payment changes',
       icon: DollarSign,
     },
     {
-      key: 'stockAlerts',
+      key: 'stockAlerts' as const,
       label: 'Low Stock Alerts',
       desc: 'Pharmacy inventory running low',
       icon: AlertTriangle,
     },
     {
-      key: 'staffChanges',
+      key: 'staffChanges' as const,
       label: 'Staff Schedule Changes',
-      desc: 'When staff schedules are modified',
+      desc: 'When schedules are modified',
       icon: UserPlus,
     },
   ]
+
+  if (!loaded) return null
 
   return (
     <motion.div
@@ -130,40 +182,18 @@ export default function NotificationSettings() {
 
       {/* Channels */}
       <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6">
-        <p
-          className="text-white/60 text-xs font-medium mb-4 uppercase
-          tracking-wider"
-        >
+        <p className="text-white/60 text-xs font-medium mb-4 uppercase tracking-wider">
           Notification Channels
         </p>
         <div className="space-y-3">
-          {[
-            {
-              key: 'email' as const,
-              label: 'Email Notifications',
-              desc: 'Receive updates via email',
-              icon: Mail,
-            },
-            {
-              key: 'push' as const,
-              label: 'Push Notifications',
-              desc: 'Browser and mobile push',
-              icon: Bell,
-            },
-            {
-              key: 'sms' as const,
-              label: 'SMS Notifications',
-              desc: 'Text message alerts',
-              icon: MessageSquare,
-            },
-          ].map((ch) => {
+          {channelItems.map((ch) => {
             const Icon = ch.icon
             return (
               <div
                 key={ch.key}
                 className="flex items-center justify-between px-4 py-3
-                  rounded-xl bg-white/[0.02] border border-white/[0.04]
-                  hover:border-white/[0.08] transition-colors duration-200"
+                rounded-xl bg-white/[0.02] border border-white/[0.04]
+                hover:border-white/[0.08] transition-colors duration-200"
               >
                 <div className="flex items-center gap-3">
                   <div className="p-1.5 bg-white/[0.04] rounded-lg">
@@ -175,7 +205,7 @@ export default function NotificationSettings() {
                   </div>
                 </div>
                 <Toggle
-                  enabled={channels[ch.key]}
+                  enabled={prefs.channels[ch.key]}
                   onChange={() => toggleChannel(ch.key)}
                 />
               </div>
@@ -186,10 +216,7 @@ export default function NotificationSettings() {
 
       {/* Alert types */}
       <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6">
-        <p
-          className="text-white/60 text-xs font-medium mb-4 uppercase
-          tracking-wider"
-        >
+        <p className="text-white/60 text-xs font-medium mb-4 uppercase tracking-wider">
           Alert Types
         </p>
         <div className="space-y-3">
@@ -199,8 +226,8 @@ export default function NotificationSettings() {
               <div
                 key={item.key}
                 className="flex items-center justify-between px-4 py-3
-                  rounded-xl bg-white/[0.02] border border-white/[0.04]
-                  hover:border-white/[0.08] transition-colors duration-200"
+                rounded-xl bg-white/[0.02] border border-white/[0.04]
+                hover:border-white/[0.08] transition-colors duration-200"
               >
                 <div className="flex items-center gap-3">
                   <div className="p-1.5 bg-white/[0.04] rounded-lg">
@@ -212,7 +239,7 @@ export default function NotificationSettings() {
                   </div>
                 </div>
                 <Toggle
-                  enabled={alerts[item.key]}
+                  enabled={prefs.alerts[item.key]}
                   onChange={() => toggleAlert(item.key)}
                 />
               </div>
@@ -222,26 +249,24 @@ export default function NotificationSettings() {
       </div>
 
       {/* Save */}
-      <div className="flex items-center justify-end gap-3">
-        {saved && (
-          <motion.span
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-emerald-400 text-xs"
-          >
-            ✓ Preferences saved
-          </motion.span>
-        )}
+      <div className="flex justify-end">
         <motion.button
           onClick={handleSave}
+          disabled={isSaving}
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
           className="flex items-center gap-2 px-5 py-2.5 bg-white
             text-black rounded-xl text-sm font-medium
-            hover:bg-white/90 transition-colors duration-200"
+            hover:bg-white/90 transition-colors duration-200
+            disabled:opacity-60 disabled:cursor-not-allowed min-w-[160px] justify-center"
         >
-          <Save className="w-4 h-4" />
-          Save Preferences
+          {isSaving ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" /> Saving...
+            </>
+          ) : (
+            'Save Preferences'
+          )}
         </motion.button>
       </div>
     </motion.div>
