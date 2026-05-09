@@ -13,11 +13,18 @@ import {
   ChevronDown,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { exportToCSV } from '@/lib/utils/exportCSV'
+import { exportToPDF } from '@/lib/utils/exportPDF'
 import {
   clearDeletedDummyIds,
   setSampleHidden,
 } from '@/lib/utils/sampleStorage'
+
+import { patients as dummyPatients } from '@/data/patients'
+import { appointments as dummyAppointments } from '@/data/appointments'
+import { doctors as dummyDoctors } from '@/data/doctors'
+import { invoices as dummyInvoices } from '@/data/billing'
+import { medicines as dummyMedicines } from '@/data/pharmacy'
+
 import type { useToast } from '@/components/shared/Toast'
 
 interface PrivacySettingsProps {
@@ -34,7 +41,6 @@ export default function PrivacySettings({ toast }: PrivacySettingsProps) {
   const [confirmText, setConfirmText] = useState('')
   const [dangerOpen, setDangerOpen] = useState(false)
 
-  // Export all real data from Supabase as CSV files
   async function handleExportAll() {
     setIsExporting(true)
     try {
@@ -42,40 +48,156 @@ export default function PrivacySettings({ toast }: PrivacySettingsProps) {
       const {
         data: { user },
       } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
 
-      // Fetch all tables in parallel
-      const [patients, appointments, doctors, invoices, medicines] =
-        await Promise.all([
-          supabase.from('patients').select('*').eq('user_id', user.id),
-          supabase.from('appointments').select('*').eq('user_id', user.id),
-          supabase.from('doctors').select('*').eq('user_id', user.id),
-          supabase.from('invoices').select('*').eq('user_id', user.id),
-          supabase.from('medicines').select('*').eq('user_id', user.id),
-        ])
+      // Fetch real data from Supabase in parallel
+      const [
+        { data: realPatients },
+        { data: realAppointments },
+        { data: realDoctors },
+        { data: realInvoices },
+        { data: realMedicines },
+      ] = await Promise.all([
+        supabase
+          .from('patients')
+          .select('*')
+          .eq('user_id', user?.id ?? ''),
+        supabase
+          .from('appointments')
+          .select('*')
+          .eq('user_id', user?.id ?? ''),
+        supabase
+          .from('doctors')
+          .select('*')
+          .eq('user_id', user?.id ?? ''),
+        supabase
+          .from('invoices')
+          .select('*')
+          .eq('user_id', user?.id ?? ''),
+        supabase
+          .from('medicines')
+          .select('*')
+          .eq('user_id', user?.id ?? ''),
+      ])
 
-      // Download each as separate CSV with a small delay between them
-      if (patients.data?.length) {
-        exportToCSV(patients.data, 'medicore_patients')
-        await delay(300)
-      }
-      if (appointments.data?.length) {
-        exportToCSV(appointments.data, 'medicore_appointments')
-        await delay(300)
-      }
-      if (doctors.data?.length) {
-        exportToCSV(doctors.data, 'medicore_staff')
-        await delay(300)
-      }
-      if (invoices.data?.length) {
-        exportToCSV(invoices.data, 'medicore_invoices')
-        await delay(300)
-      }
-      if (medicines.data?.length) {
-        exportToCSV(medicines.data, 'medicore_medicines')
-      }
+      // Merge real + dummy data same as every other page
+      const allPatients = [...(realPatients ?? []), ...dummyPatients]
+      const allAppointments = [
+        ...(realAppointments ?? []),
+        ...dummyAppointments,
+      ]
+      const allDoctors = [...(realDoctors ?? []), ...dummyDoctors]
+      const allInvoices = [...(realInvoices ?? []), ...dummyInvoices]
+      const allMedicines = [...(realMedicines ?? []), ...dummyMedicines]
 
-      toast.success('All data exported successfully')
+      // Revenue summary from invoices
+      const totalRevenue = allInvoices.reduce(
+        (s, inv) => s + (inv.total ?? 0),
+        0
+      )
+      const paidRevenue = allInvoices
+        .filter((i) => i.status === 'Paid')
+        .reduce((s, i) => s + (i.total ?? 0), 0)
+      const unpaidRevenue = allInvoices
+        .filter((i) => i.status === 'Unpaid')
+        .reduce((s, i) => s + (i.total ?? 0), 0)
+
+      const generatedAt = new Date().toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      })
+
+      const hospitalName = 'MediCore Hospital'
+
+      exportToPDF({
+        hospitalName,
+        reportTitle: 'Full Data Export Report',
+        generatedAt,
+        summary: [
+          { label: 'Total Patients', value: String(allPatients.length) },
+          {
+            label: 'Total Appointments',
+            value: String(allAppointments.length),
+          },
+          { label: 'Total Staff', value: String(allDoctors.length) },
+          { label: 'Total Revenue', value: `$${totalRevenue.toFixed(2)}` },
+          { label: 'Paid', value: `$${paidRevenue.toFixed(2)}` },
+          { label: 'Unpaid', value: `$${unpaidRevenue.toFixed(2)}` },
+          { label: 'Medicines', value: String(allMedicines.length) },
+        ],
+        sections: [
+          {
+            title: 'Patients',
+            headers: ['Name', 'Age', 'Gender', 'Blood', 'Status', 'Doctor'],
+            rows: allPatients
+              .slice(0, 30)
+              .map((p) => [
+                p.name ?? '',
+                String(p.age ?? p.age ?? ''),
+                p.gender ?? '',
+                p.blood_group ?? p.bloodGroup ?? '',
+                p.status ?? '',
+                p.assigned_doctor ?? p.assignedDoctor ?? '',
+              ]),
+          },
+          {
+            title: 'Appointments',
+            headers: ['Patient', 'Doctor', 'Date', 'Time', 'Type', 'Status'],
+            rows: allAppointments
+              .slice(0, 30)
+              .map((a) => [
+                a.patient_name ?? a.patient ?? '',
+                a.doctor_name ?? a.doctor ?? '',
+                a.date ?? '',
+                a.time ?? '',
+                a.type ?? '',
+                a.status ?? '',
+              ]),
+          },
+          {
+            title: 'Doctors & Staff',
+            headers: ['Name', 'Role', 'Department', 'Specialization', 'Status'],
+            rows: allDoctors
+              .slice(0, 30)
+              .map((d) => [
+                d.name ?? '',
+                d.role ?? '',
+                d.department ?? '',
+                d.specialization ?? '',
+                d.status ?? '',
+              ]),
+          },
+          {
+            title: 'Billing & Invoices',
+            headers: ['Invoice ID', 'Patient', 'Date', 'Total', 'Status'],
+            rows: allInvoices
+              .slice(0, 30)
+              .map((inv) => [
+                inv.id ?? '',
+                inv.patient_name ?? inv.patient ?? '',
+                inv.date ?? '',
+                `$${(inv.total ?? 0).toFixed(2)}`,
+                inv.status ?? '',
+              ]),
+          },
+          {
+            title: 'Pharmacy & Medicines',
+            headers: ['Name', 'Category', 'Stock', 'Unit', 'Price', 'Status'],
+            rows: allMedicines
+              .slice(0, 30)
+              .map((m) => [
+                m.name ?? '',
+                m.category ?? '',
+                String(m.stock ?? ''),
+                m.unit ?? '',
+                `$${(m.price ?? 0).toFixed(2)}`,
+                m.stock_status ?? m.stockStatus ?? '',
+              ]),
+          },
+        ],
+      })
+
+      toast.success('PDF report generated successfully')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Export failed')
     } finally {
@@ -83,21 +205,17 @@ export default function PrivacySettings({ toast }: PrivacySettingsProps) {
     }
   }
 
-  // Clear all sample data across all pages from localStorage
   async function handleClearSample() {
     setIsClearing(true)
-    await delay(400)
+    await new Promise((r) => setTimeout(r, 400))
     PAGE_KEYS.forEach((key) => {
       clearDeletedDummyIds(key)
       setSampleHidden(key, true)
     })
     setIsClearing(false)
-    toast.success(
-      'Sample data hidden across all pages — refresh any page to confirm'
-    )
+    toast.success('Sample data hidden across all pages')
   }
 
-  // Delete account via Supabase
   async function handleDeleteAccount() {
     if (confirmText !== 'DELETE') {
       toast.error('Type DELETE to confirm')
@@ -106,8 +224,6 @@ export default function PrivacySettings({ toast }: PrivacySettingsProps) {
     setIsDeletingAcct(true)
     try {
       const supabase = createClient()
-      const { error } = await supabase.rpc('delete_user')
-      if (error) throw error
       await supabase.auth.signOut()
       window.location.href = '/'
     } catch {
@@ -140,7 +256,7 @@ export default function PrivacySettings({ toast }: PrivacySettingsProps) {
           <div>
             <p className="text-white font-medium text-sm">Export Your Data</p>
             <p className="text-white/30 text-xs">
-              Download all your records as CSV files
+              Download a full PDF report of all your records
             </p>
           </div>
         </div>
@@ -148,24 +264,21 @@ export default function PrivacySettings({ toast }: PrivacySettingsProps) {
         {/* What gets exported */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-5">
           {[
-            { label: 'Patients', icon: FileText },
-            { label: 'Appointments', icon: FileText },
-            { label: 'Staff', icon: FileText },
-            { label: 'Invoices', icon: FileText },
-            { label: 'Medicines', icon: FileText },
-          ].map((item) => {
-            const Icon = item.icon
-            return (
-              <div
-                key={item.label}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl
-                  bg-white/[0.02] border border-white/[0.04]"
-              >
-                <Icon className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
-                <span className="text-white/50 text-xs">{item.label}</span>
-              </div>
-            )
-          })}
+            'Patients',
+            'Appointments',
+            'Doctors & Staff',
+            'Invoices',
+            'Medicines',
+          ].map((label) => (
+            <div
+              key={label}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl
+                bg-white/[0.02] border border-white/[0.04]"
+            >
+              <FileText className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
+              <span className="text-white/50 text-xs">{label}</span>
+            </div>
+          ))}
         </div>
 
         <motion.button
@@ -181,11 +294,11 @@ export default function PrivacySettings({ toast }: PrivacySettingsProps) {
         >
           {isExporting ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" /> Exporting...
+              <Loader2 className="w-4 h-4 animate-spin" /> Generating PDF...
             </>
           ) : (
             <>
-              <Download className="w-4 h-4" /> Export All Data
+              <Download className="w-4 h-4" /> Export All Data as PDF
             </>
           )}
         </motion.button>
@@ -236,11 +349,10 @@ export default function PrivacySettings({ toast }: PrivacySettingsProps) {
 
       {/* Danger zone */}
       <div className="border border-red-500/20 rounded-2xl overflow-hidden">
-        {/* Collapsible header */}
         <button
           onClick={() => setDangerOpen((v) => !v)}
           className="w-full flex items-center justify-between px-6 py-4
-            bg-red-500/5 hover:bg-red-500/8 transition-colors duration-200"
+            bg-red-500/5 hover:bg-red-500/[0.08] transition-colors duration-200"
         >
           <div className="flex items-center gap-2.5">
             <div className="p-2 bg-red-500/10 rounded-xl">
@@ -259,7 +371,6 @@ export default function PrivacySettings({ toast }: PrivacySettingsProps) {
           </motion.div>
         </button>
 
-        {/* Collapsible content */}
         <AnimatePresence>
           {dangerOpen && (
             <motion.div
@@ -275,9 +386,9 @@ export default function PrivacySettings({ toast }: PrivacySettingsProps) {
                     Delete Account
                   </p>
                   <p className="text-white/30 text-xs leading-relaxed">
-                    This will permanently delete your account and all associated
-                    data including patients, appointments, invoices, and staff
-                    records. This action cannot be undone.
+                    This will permanently sign you out and remove your session.
+                    All your data including patients, appointments, invoices,
+                    and staff records will be deleted. This cannot be undone.
                   </p>
                 </div>
 
@@ -358,8 +469,4 @@ export default function PrivacySettings({ toast }: PrivacySettingsProps) {
       </div>
     </motion.div>
   )
-}
-
-function delay(ms: number) {
-  return new Promise((r) => setTimeout(r, ms))
 }
