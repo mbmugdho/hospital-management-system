@@ -8,7 +8,7 @@ import SettingsTabs from '@/components/settings/SettingsTabs'
 import ProfileSettings from '@/components/settings/ProfileSettings'
 import SecuritySettings from '@/components/settings/SecuritySettings'
 import NotificationSettings from '@/components/settings/NotificationSettings'
-import AppearanceSettings from '@/components/settings/AppearanceSettings'
+import PrivacySettings from '@/components/settings/PrivacySettings'
 import HospitalSettings from '@/components/settings/HospitalSettings'
 import type { SettingsTab } from '@/components/settings/SettingsTabs'
 
@@ -73,7 +73,7 @@ export default function SettingsPageClient({
             {activeTab === 'notifications' && (
               <NotificationSettings toast={toast} />
             )}
-            {activeTab === 'appearance' && <AppearanceSettings toast={toast} />}
+            {activeTab === 'privacy' && <PrivacySettings toast={toast} />}
             {activeTab === 'hospital' && (
               <HospitalSettings
                 hospitalName={hospitalName}

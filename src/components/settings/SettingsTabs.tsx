@@ -1,13 +1,13 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { User, Shield, Bell, Palette, Building2 } from 'lucide-react'
+import { User, Shield, Bell, Lock, Building2 } from 'lucide-react'
 
 export type SettingsTab =
   | 'profile'
   | 'security'
   | 'notifications'
-  | 'appearance'
+  | 'privacy'
   | 'hospital'
 
 interface SettingsTabsProps {
@@ -40,10 +40,10 @@ const tabs: {
     desc: 'Email, push & SMS',
   },
   {
-    id: 'appearance',
-    label: 'Appearance',
-    icon: Palette,
-    desc: 'Theme & layout',
+    id: 'privacy',
+    label: 'Data & Privacy',
+    icon: Lock,
+    desc: 'Export data & account',
   },
   {
     id: 'hospital',
@@ -82,15 +82,15 @@ export default function SettingsTabs({ active, onChange }: SettingsTabsProps) {
             >
               <div
                 className={`p-2 rounded-lg flex-shrink-0
-                  ${
-                    isActive
-                      ? 'bg-indigo-500/15 text-indigo-400'
-                      : 'bg-white/[0.04] text-white/30'
-                  }`}
+                ${
+                  isActive
+                    ? 'bg-indigo-500/15 text-indigo-400'
+                    : 'bg-white/[0.04] text-white/30'
+                }`}
               >
                 <Icon className="w-4 h-4" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p
                   className={`text-sm font-medium
                   ${isActive ? 'text-white' : 'text-white/60'}`}
@@ -98,18 +98,17 @@ export default function SettingsTabs({ active, onChange }: SettingsTabsProps) {
                   {tab.label}
                 </p>
                 <p
-                  className={`text-xs
+                  className={`text-xs truncate
                   ${isActive ? 'text-white/40' : 'text-white/25'}`}
                 >
                   {tab.desc}
                 </p>
               </div>
 
-              {/* Active indicator */}
               {isActive && (
                 <motion.div
                   layoutId="settings-tab-indicator"
-                  className="ml-auto w-1.5 h-8 bg-indigo-500 rounded-full"
+                  className="ml-auto w-1.5 h-8 bg-indigo-500 rounded-full flex-shrink-0"
                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 />
               )}
