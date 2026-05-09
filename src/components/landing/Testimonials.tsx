@@ -1,48 +1,46 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import Container from '@/components/shared/Container'
 import AnimateIn from '@/components/shared/AnimateIn'
-import StaggerContainer from '@/components/shared/StaggerContainer'
-import StaggerItem from '@/components/shared/StaggerItem'
+import { Quote } from 'lucide-react'
 
 const testimonials = [
   {
     quote:
-      'MediCore transformed how we manage our 300-bed hospital. Patient records, appointments, and billing are now seamlessly connected. We cut admin time by 40% in the first month.',
+      'MediCore transformed how we manage our 300-bed hospital. Patient records, appointments, and billing are seamlessly connected. We cut administrative time by 40% in the first month alone.',
     name: 'Dr. Sarah Mitchell',
     role: 'Chief Medical Officer',
     hospital: 'Boston General Hospital',
     initials: 'SM',
     color: 'from-indigo-400 to-violet-500',
-    stars: 5,
+    featured: true,
   },
   {
     quote:
-      'The pharmacy inventory alerts alone saved us from three critical stockouts. The dashboard gives me a complete picture of our operations every morning before rounds.',
+      'The pharmacy inventory alerts saved us from three critical stockouts last quarter. The dashboard gives me a complete operational picture every morning.',
     name: 'Dr. James Okafor',
     role: 'Hospital Administrator',
     hospital: 'Lagos Medical Center',
     initials: 'JO',
     color: 'from-emerald-400 to-cyan-500',
-    stars: 5,
+    featured: false,
   },
   {
     quote:
-      'Switching from paper-based records to MediCore was seamless. Our staff learned the system in a day. The billing module alone paid for the subscription in week one.',
+      'Our staff learned the system in a single day. The billing module alone paid for the subscription in the first week of use.',
     name: 'Dr. Priya Nair',
     role: 'Head of Operations',
     hospital: 'Apollo Clinic, Mumbai',
     initials: 'PN',
     color: 'from-rose-400 to-pink-500',
-    stars: 5,
+    featured: false,
   },
 ]
 
-function StarRating({ count }: { count: number }) {
+function StarRow() {
   return (
-    <div className="flex items-center gap-0.5 mb-4">
-      {Array.from({ length: count }).map((_, i) => (
+    <div className="flex items-center gap-0.5">
+      {Array.from({ length: 5 }).map((_, i) => (
         <svg
           key={i}
           className="w-3.5 h-3.5 text-amber-400 fill-amber-400"
@@ -55,15 +53,73 @@ function StarRating({ count }: { count: number }) {
   )
 }
 
+interface QuoteCardProps {
+  t: (typeof testimonials)[0]
+  large?: boolean
+}
+
+function QuoteCard({ t, large = false }: QuoteCardProps) {
+  return (
+    <div
+      className={`h-full bg-white/[0.02] border border-white/[0.06]
+      rounded-2xl flex flex-col
+      hover:bg-white/[0.04] hover:border-white/[0.10]
+      transition-colors duration-300
+      ${large ? 'p-8 lg:p-10' : 'p-6'}`}
+    >
+      {/* Quote icon + stars */}
+      <div className="flex items-center justify-between mb-5">
+        <Quote
+          className={`text-indigo-500/20 ${large ? 'w-10 h-10' : 'w-7 h-7'}`}
+        />
+        <StarRow />
+      </div>
+
+      {/* Quote text */}
+      <p
+        className={`text-white/50 leading-relaxed flex-1 mb-6
+        ${large ? 'text-base lg:text-lg' : 'text-sm'}`}
+      >
+        &ldquo;{t.quote}&rdquo;
+      </p>
+
+      {/* Author */}
+      <div className="flex items-center gap-3 pt-5 border-t border-white/[0.06]">
+        <div
+          className={`rounded-full flex-shrink-0
+          bg-gradient-to-br ${t.color}
+          flex items-center justify-center border border-white/[0.10]
+          ${large ? 'w-11 h-11' : 'w-9 h-9'}`}
+        >
+          <span
+            className={`text-white font-bold
+            ${large ? 'text-sm' : 'text-xs'}`}
+          >
+            {t.initials}
+          </span>
+        </div>
+        <div className="min-w-0">
+          <p className="text-white/80 text-sm font-semibold truncate">
+            {t.name}
+          </p>
+          <p className="text-white/30 text-xs truncate">
+            {t.role} · {t.hospital}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Testimonials() {
+  const featured = testimonials.find((t) => t.featured)!
+  const others = testimonials.filter((t) => !t.featured)
+
   return (
     <section id="testimonials" className="py-20 lg:py-28">
       <Container>
-        {/* Header */}
-        <div
-          className="flex flex-col items-center text-center max-w-2xl
-          mx-auto mb-16"
-        >
+        {/* Header — left aligned */}
+        <div className="max-w-xl mb-14 lg:mb-16">
           <AnimateIn>
             <span
               className="inline-flex items-center gap-2 px-4 py-1.5
@@ -79,78 +135,42 @@ export default function Testimonials() {
               className="text-3xl lg:text-4xl font-bold text-white
               tracking-tight leading-tight mb-4"
             >
-              Trusted by Healthcare
-              <br className="hidden sm:block" />
-              Professionals <span className="text-indigo-400">Worldwide</span>
+              What healthcare teams
+              <br />
+              are saying
             </h2>
           </AnimateIn>
           <AnimateIn delay={0.2}>
             <p className="text-white/30 text-base lg:text-lg leading-relaxed">
-              Hospitals and clinics across the globe use MediCore to deliver
-              better patient care.
+              Hospitals and clinics across the globe rely on MediCore for their
+              daily operations.
             </p>
           </AnimateIn>
         </div>
 
-        {/* Cards */}
-        <StaggerContainer
-          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"
-          staggerDelay={0.1}
-        >
-          {testimonials.map((t) => (
-            <StaggerItem key={t.name}>
-              <motion.div
-                whileHover={{ y: -4 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                className="group h-full bg-white/[0.02] border border-white/[0.06]
-                  rounded-2xl p-6 flex flex-col
-                  hover:bg-white/[0.04] hover:border-white/[0.10]
-                  hover:shadow-lg hover:shadow-black/30
-                  transition-colors duration-300"
-              >
-                {/* Stars */}
-                <StarRating count={t.stars} />
+        {/* Asymmetric layout — large left, stacked right */}
+        <div className="grid lg:grid-cols-2 gap-5">
+          {/* Featured — large card */}
+          <AnimateIn delay={0.15}>
+            <QuoteCard t={featured} large />
+          </AnimateIn>
 
-                {/* Quote */}
-                <p className="text-white/50 text-sm leading-relaxed flex-1 mb-6">
-                  &ldquo;{t.quote}&rdquo;
-                </p>
+          {/* Two stacked cards */}
+          <div className="flex flex-col gap-5">
+            {others.map((t, i) => (
+              <AnimateIn key={t.name} delay={0.2 + i * 0.1}>
+                <QuoteCard t={t} />
+              </AnimateIn>
+            ))}
+          </div>
+        </div>
 
-                {/* Author */}
-                <div
-                  className="flex items-center gap-3 pt-5
-                  border-t border-white/[0.06]"
-                >
-                  <div
-                    className={`w-10 h-10 rounded-full flex-shrink-0
-                    bg-gradient-to-br ${t.color}
-                    flex items-center justify-center
-                    border border-white/[0.10]`}
-                  >
-                    <span className="text-white text-xs font-bold">
-                      {t.initials}
-                    </span>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-white/80 text-sm font-semibold truncate">
-                      {t.name}
-                    </p>
-                    <p className="text-white/30 text-xs truncate">{t.role}</p>
-                    <p className="text-indigo-400/60 text-xs truncate">
-                      {t.hospital}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
-
-        {/* Bottom trust bar */}
+        {/* Bottom stats bar */}
         <AnimateIn delay={0.3}>
           <div
-            className="mt-14 flex flex-col sm:flex-row items-center
-            justify-center gap-8 sm:gap-12"
+            className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-6
+            bg-white/[0.02] border border-white/[0.06] rounded-2xl
+            p-6 lg:p-8"
           >
             {[
               { value: '500+', label: 'Hospitals worldwide' },
@@ -158,9 +178,11 @@ export default function Testimonials() {
               { value: '4.9', label: 'Average rating' },
               { value: '24/7', label: 'Support available' },
             ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <p className="text-2xl font-black text-white">{stat.value}</p>
-                <p className="text-white/30 text-xs mt-0.5">{stat.label}</p>
+              <div key={stat.label}>
+                <p className="text-2xl lg:text-3xl font-black text-white">
+                  {stat.value}
+                </p>
+                <p className="text-white/30 text-xs mt-1">{stat.label}</p>
               </div>
             ))}
           </div>
