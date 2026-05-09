@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: 'MediCore — Hospital Management System',
   description: 'Modern Hospital Management System for clinics and hospitals',
   icons: {
-    icon: '/favicon.svg',
+    icon: '/favicon.png',
   },
 }
 
